@@ -1,6 +1,8 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -178,4 +180,45 @@ public class MOVE implements InstructionHandler
 
 		return new DisassembledInstruction(address, opcode, "move" + sz.ext(), src, dst);
 	}
+
+    public final DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        int opcode = 0;
+
+        switch(instruction.size) {
+            case Word:
+                opcode |= 0x1000;
+                break;
+            case Long:
+                opcode |= 0x2000;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        int bytes1 = 0;
+        int bytes2 = 0;
+
+        switch(op1.mode) {
+            case IMMEDIATE_DATA:
+                opcode |= op1.register << 9;
+                opcode |= op1.mode.bits() << 6;
+                break;
+            case IMMEDIATE_ADDRESS:
+                opcode |= op1.register << 9;
+                break;
+            case IMMEDIATE:
+                opcode |= 6 << 9;
+                opcode |= 7 << 6;
+                bytes1 = instruction.size.byteCount();
+                break;
+        }
+
+        opcode |= op2.mode.bits() << 3;
+        opcode |= op2.register;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, bytes1, op1.memory_read),
+                new DisassembledOperand(op2.operand, bytes2, op2.memory_read));
+    }
 }
