@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -58,4 +59,9 @@ public class RESET implements InstructionHandler
 			}
 		});
 	}
+
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
 }

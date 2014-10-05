@@ -1,6 +1,8 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
+
 /*
 //  M68k - Java Amiga MachineCore
 //  Copyright (c) 2008-2010, Tony Headford
@@ -175,7 +177,12 @@ public class ASL implements InstructionHandler
 		}
 	}
 
-	protected int asl_byte_imm(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected int asl_byte_imm(int opcode)
 	{
 		int shift = (opcode >> 9) & 0x07;
 		if(shift == 0)

@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -132,7 +133,12 @@ public class BCHG implements InstructionHandler
 
 	}
 
-	protected final int bchg_dyn_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int bchg_dyn_byte(int opcode)
 	{
 		int bit = 1 << cpu.getDataRegisterLong((opcode >> 9) & 0x07);
 

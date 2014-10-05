@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -80,7 +81,12 @@ public class EXT implements InstructionHandler
 		}
 	}
 
-	protected final int ext_byte_to_word(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int ext_byte_to_word(int opcode)
 	{
 		int s = cpu.getDataRegisterByte(opcode & 0x07);
 		if((s & 0x80) == 0x80)

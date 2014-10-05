@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -63,7 +64,12 @@ public class TAS implements InstructionHandler
 		}
 	}
 
-	protected final int tas(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int tas(int opcode)
 	{
 		//TODO: this is for multi-processor systems and provides an atomic read-modify-write - this isn't handled at the moment
 

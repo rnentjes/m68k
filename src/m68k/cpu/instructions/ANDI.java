@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -102,7 +103,12 @@ public class ANDI implements InstructionHandler
 		}
 	}
 
-	protected int andi_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected int andi_byte(int opcode)
 	{
 		int s = CpuUtils.signExtendByte(cpu.fetchPCWord());
 		Operand dst = cpu.resolveDstEA((opcode >> 3) & 0x07, opcode & 0x07, Size.Byte);

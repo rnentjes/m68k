@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -59,7 +60,12 @@ public class MOVEQ implements InstructionHandler
 		}
 	}
 
-	protected final int moveq(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int moveq(int opcode)
 	{
 		int reg = (opcode >> 9 & 0x07);
 		int data = CpuUtils.signExtendWord(CpuUtils.signExtendByte(opcode & 0xff));

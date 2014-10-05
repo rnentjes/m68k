@@ -1,5 +1,8 @@
 package m68k.cpu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /*
 //  M68k - Java Amiga MachineCore
 //  Copyright (c) 2008-2010, Tony Headford
@@ -81,6 +84,39 @@ public class DisassembledInstruction
 
 		return size;
 	}
+
+    public List<Byte> bytes() {
+        List<Byte> result = new ArrayList<Byte>();
+
+        result.add((byte)(opcode / 256));
+        result.add((byte)(opcode % 256));
+
+        if (num_operands >= 1) {
+            if (op1.bytes == 2) {
+                result.add((byte) ((op1.memory_read >> 8) % 256));
+                result.add((byte) ((op1.memory_read) % 256));
+            } else if (op1.bytes == 4) {
+                result.add((byte) ((op1.memory_read >> 24) % 256));
+                result.add((byte) ((op1.memory_read >> 16) % 256));
+                result.add((byte) ((op1.memory_read >> 8) % 256));
+                result.add((byte) ((op1.memory_read) % 256));
+            }
+        }
+
+        if (num_operands >= 2) {
+            if (op2.bytes == 2) {
+                result.add((byte) ((op2.memory_read >> 8) % 256));
+                result.add((byte) ((op2.memory_read) % 256));
+            } else if (op1.bytes == 4) {
+                result.add((byte) ((op2.memory_read >> 24) % 256));
+                result.add((byte) ((op2.memory_read >> 16) % 256));
+                result.add((byte) ((op2.memory_read >> 8) % 256));
+                result.add((byte) ((op2.memory_read) % 256));
+            }
+        }
+
+        return result;
+    }
 
 	public void shortFormat(StringBuilder buffer)
 	{

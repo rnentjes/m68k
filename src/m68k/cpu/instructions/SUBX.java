@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -156,7 +157,12 @@ public class SUBX implements InstructionHandler
 		}
 	}
 
-	protected int subx_byte_reg(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected int subx_byte_reg(int opcode)
 	{
 		int s = cpu.getDataRegisterByteSigned((opcode & 0x07));
 		int d = cpu.getDataRegisterByteSigned((opcode >> 9) & 0x07);

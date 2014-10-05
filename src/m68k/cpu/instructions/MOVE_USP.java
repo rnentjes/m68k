@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -80,7 +81,12 @@ public class MOVE_USP implements InstructionHandler
 		}
 	}
 
-	protected final int move_to_usp(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int move_to_usp(int opcode)
 	{
 		if(!cpu.isSupervisorMode())
 		{

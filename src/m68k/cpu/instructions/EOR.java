@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -106,7 +107,12 @@ public class EOR implements InstructionHandler
 		}
 	}
 
-	protected final int eor_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int eor_byte(int opcode)
 	{
 		int s = cpu.getDataRegisterByte((opcode >> 9) & 0x07);
 		Operand dst = cpu.resolveDstEA((opcode >> 3) & 0x07, opcode & 0x07, Size.Byte);

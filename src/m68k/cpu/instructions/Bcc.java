@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -72,7 +73,12 @@ public class Bcc implements InstructionHandler
 		}
 	}
 
-	protected final int bxx_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int bxx_byte(int opcode)
 	{
 		int dis = CpuUtils.signExtendByte(opcode & 0xff);
 		int cc = (opcode >> 8) & 0x0f;

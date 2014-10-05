@@ -185,8 +185,11 @@ public class MOVE implements InstructionHandler
         int opcode = 0;
 
         switch(instruction.size) {
-            case Word:
+            case Byte:
                 opcode |= 0x1000;
+                break;
+            case Word:
+                opcode |= 0x3000;
                 break;
             case Long:
                 opcode |= 0x2000;
@@ -196,29 +199,13 @@ public class MOVE implements InstructionHandler
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
         AssembledOperand op2 = (AssembledOperand)instruction.op2;
 
-        int bytes1 = 0;
-        int bytes2 = 0;
-
-        switch(op1.mode) {
-            case IMMEDIATE_DATA:
-                opcode |= op1.register << 9;
-                opcode |= op1.mode.bits() << 6;
-                break;
-            case IMMEDIATE_ADDRESS:
-                opcode |= op1.register << 9;
-                break;
-            case IMMEDIATE:
-                opcode |= 6 << 9;
-                opcode |= 7 << 6;
-                bytes1 = instruction.size.byteCount();
-                break;
-        }
-
-        opcode |= op2.mode.bits() << 3;
-        opcode |= op2.register;
+        opcode |= op2.register << 9;
+        opcode |= op2.mode.bits() << 6;
+        opcode |= op1.mode.bits() << 3;
+        opcode |= op1.register;
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,
-                new DisassembledOperand(op1.operand, bytes1, op1.memory_read),
-                new DisassembledOperand(op2.operand, bytes2, op2.memory_read));
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 }

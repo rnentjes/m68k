@@ -1,6 +1,8 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -107,7 +109,34 @@ public class ADDQ implements InstructionHandler
 		}
 	}
 
-	protected final int addq_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        int opcode = 0x5000;
+
+        switch(instruction.size) {
+            case Word:
+                opcode |= 1 << 6;
+                break;
+            case Long:
+                opcode |= 2 << 6;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        // data
+        opcode |= (op1.memory_read & 7) << 9;
+
+        opcode |= op2.mode.bits() << 3;
+        opcode |= op2.register;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, 0, op1.memory_read),
+                new DisassembledOperand(op2.operand, 0, op2.memory_read));
+    }
+
+    protected final int addq_byte(int opcode)
 	{
 		int s = (opcode >> 9 & 0x07);
 		if(s == 0)

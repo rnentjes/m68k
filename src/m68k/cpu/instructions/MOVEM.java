@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -143,7 +144,12 @@ public class MOVEM implements InstructionHandler
 		}
 	}
 
-	protected final int movem_word_r2m(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int movem_word_r2m(int opcode)
 	{
 		int reglist = cpu.fetchPCWord();
 		Operand dst = cpu.resolveDstEA((opcode >> 3) & 0x07, opcode & 0x07, Size.Word);

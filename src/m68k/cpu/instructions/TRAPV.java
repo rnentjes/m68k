@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -49,7 +50,12 @@ public class TRAPV implements InstructionHandler
 		});
 	}
 
-	protected final int trapv(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int trapv(int opcode)
 	{
 		if(cpu.isFlagSet(Cpu.V_FLAG))
 		{

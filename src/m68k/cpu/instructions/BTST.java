@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 /*
 //  M68k - Java Amiga MachineCore
 //  Copyright (c) 2008-2010, Tony Headford
@@ -131,7 +132,12 @@ public class BTST implements InstructionHandler
 
 	}
 
-	protected final int btst_dyn_byte(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int btst_dyn_byte(int opcode)
 	{
 		int bit = 1 << cpu.getDataRegisterLong((opcode >> 9) & 0x07);
 

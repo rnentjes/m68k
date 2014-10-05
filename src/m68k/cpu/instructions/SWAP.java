@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -55,7 +56,12 @@ public class SWAP implements InstructionHandler
 		}
 	}
 
-	protected int swap(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected int swap(int opcode)
 	{
 		int reg = (opcode & 0x007);
 		int v = cpu.getDataRegisterLong(reg);

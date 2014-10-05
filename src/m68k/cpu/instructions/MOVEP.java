@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -127,7 +128,12 @@ public class MOVEP implements InstructionHandler
 		}
 	}
 
-	protected final int r2m_word(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int r2m_word(int opcode)
 	{
 		int dis = cpu.fetchPCWordSigned();
 		int address = cpu.getAddrRegisterLong(opcode & 0x07) + dis;

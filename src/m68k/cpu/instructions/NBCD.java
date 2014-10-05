@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -63,7 +64,12 @@ public class NBCD implements InstructionHandler
 		}
 	}
 
-	protected final int nbcd(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int nbcd(int opcode)
 	{
 		int mode = (opcode >> 3) & 0x07;
 		int reg = (opcode & 0x07);

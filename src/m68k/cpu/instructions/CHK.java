@@ -1,6 +1,7 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AssembledInstruction;
 /*
 //  M68k - Java Amiga MachineCore
 //  Copyright (c) 2008-2010, Tony Headford
@@ -67,7 +68,12 @@ public class CHK implements InstructionHandler
 		}
 	}
 
-	protected final int chk(int opcode)
+    @Override
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+        return null;
+    }
+
+    protected final int chk(int opcode)
 	{
 		int reg = (opcode >> 9) & 0x07;
 		int dval = cpu.getDataRegisterWordSigned(reg);
