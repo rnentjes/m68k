@@ -141,17 +141,15 @@ public class Assembler {
         if (lower.indexOf(' ') > 0) {
             mnemonic = lower.substring(0, lower.indexOf(' '));
             ops = lower.substring(lower.indexOf(' ')).trim();
-            String [] parts = ops.split(",");
+            int lastComma = ops.lastIndexOf(',');
 
-            if (parts.length > 1) {
-                numberOfParts = 2;
-
-                op1 = parts[0];
-                op2 = parts[1];
-            } else {
+            if (lastComma == -1) {
                 numberOfParts = 1;
-
                 op1 = ops.trim();
+            } else {
+                numberOfParts = 2;
+                op1 = ops.substring(0, lastComma).trim();
+                op2 = ops.substring(lastComma+1).trim();
             }
         }
 
@@ -208,6 +206,9 @@ public class Assembler {
         AddressingMode mode = AddressingMode.NA;
         Conditional conditional = Conditional.NA;
         int register = 0;
+        int ext_reg = 0;
+        int ext_data = 0;
+        Size ext_size = Size.Unsized;
 
         switch(ch) {
             case '#':
@@ -235,28 +236,64 @@ public class Assembler {
                 mode = AddressingMode.CCR;
                 break;
             default:
-                if (lower.startsWith("(") && lower.endsWith(")")) {
-                    // (a0)
-
-                } else if (lower.contains("(") && lower.endsWith(")")) {
+                if (lower.startsWith("-(") && lower.endsWith(")")) {
                     // -(a0)
-                    // $12(a0, a1.w)
-                    // $1234(a1)
-
-                } else if (lower.startsWith("(") && lower.contains(")")) {
+                    mode = AddressingMode.INDIRECT_POST;
+                    register = Integer.parseInt(lower.substring(3, 4));
+                } else if (lower.startsWith("(") && lower.endsWith(")+")) {
                     // (a0)+
-
+                    mode = AddressingMode.INDIRECT_PRE;
+                    register = Integer.parseInt(lower.substring(2, 3));
+                } else if (lower.startsWith("(") && lower.endsWith(")")) {
+                    mode = AddressingMode.INDIRECT;
+                    register = Integer.parseInt(lower.substring(2, 3));
+                } else if (lower.contains("(") && lower.endsWith(")")) {
+                    int indexOpen = lower.indexOf('(');
+                    int indexClose = lower.indexOf(')');
+                    // $1234(a1) / $12(a0, a1.w)
+                    if (lower.contains(",")) {
+                        if (lower.contains("pc")) {
+                            // $1234(pc)
+                            mode = AddressingMode.PC_DISP;
+                            memory_read = parseValue(lower.substring(0, indexOpen));
+                            bytes = 2;
+                        } else {
+                            // $1234(a1)
+                            mode = AddressingMode.INDIRECT_DISP;
+                            memory_read = parseValue(lower.substring(0, indexOpen));
+                            bytes = 2;
+                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
+                        }
+                    } else {
+                        if (lower.contains("pc")) {
+                            // $12(pc, d0.w)
+                            mode = AddressingMode.PC_INDEX;
+                            ext_data = parseValue(lower.substring(0, indexOpen));
+                            bytes = 2;
+                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
+                            // todo parse
+                            ext_reg = 0;
+                            ext_size = Size.Word;
+                        } else {
+                            // $12(a0, d0.w)
+                            mode = AddressingMode.INDIRECT_INDEX;
+                            ext_data = parseValue(lower.substring(0, indexOpen));
+                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
+                            // todo parse
+                            ext_reg = 0;
+                            ext_size = Size.Word;
+                            bytes = 2;
+                        }
+                    }
+                } else if (lower.endsWith(".w")) {
+                    mode = AddressingMode.ABSOLUTE_NEAR;
+                } else if (lower.endsWith(".l")) {
+                    mode = AddressingMode.ABSOLUTE_FAR;
                 }
-
-                // if parseble as number->
-                mode = AddressingMode.ABSOLUTE_NEAR;
-                mode = AddressingMode.ABSOLUTE_FAR;
-
                 break;
-
         }
 
-        return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register);
+        return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register, ext_reg, ext_data, ext_size);
     }
 
     public int parseValue(String value) {

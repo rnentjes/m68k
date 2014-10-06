@@ -1,6 +1,7 @@
 package m68k.cpu.assemble;
 
 import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Size;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -31,6 +32,10 @@ public class AssembledOperand extends DisassembledOperand
     public final AddressingMode mode;
     public final int register;
 
+    public final int ext_register;
+    public final int ext_data;
+    public final Size ext_size;
+
     public final Conditional conditional;
 
     @Override
@@ -51,6 +56,9 @@ public class AssembledOperand extends DisassembledOperand
         mode = AddressingMode.NA;
         conditional = Conditional.NA;
         register = 0;
+        ext_register = 0;
+        ext_data = 0;
+        ext_size = Size.Unsized;
 	}
 
 	public AssembledOperand(String operand, int bytes, int memory_read)
@@ -60,6 +68,9 @@ public class AssembledOperand extends DisassembledOperand
         mode = AddressingMode.NA;
         conditional = Conditional.NA;
         register = 0;
+        ext_register = 0;
+        ext_data = 0;
+        ext_size = Size.Unsized;
 
 		if(bytes > 8)
 			throw new IllegalArgumentException("Are these the wrong way around ?");
@@ -73,6 +84,26 @@ public class AssembledOperand extends DisassembledOperand
         this.mode = mode;
         this.conditional = conditional;
         this.register = register;
+        this.ext_register = 0;
+        this.ext_data = 0;
+        ext_size = Size.Unsized;
+
+        if(bytes > 8)
+            throw new IllegalArgumentException("Are these the wrong way around ?");
+    }
+
+    public AssembledOperand(String operand, int bytes, int memory_read,
+                            AddressingMode mode, Conditional conditional, int register,
+                            int ext_register, int ext_data, Size ext_size)
+    {
+        super(operand, bytes, memory_read);
+
+        this.mode = mode;
+        this.conditional = conditional;
+        this.register = register;
+        this.ext_register = ext_register;
+        this.ext_data = ext_data;
+        this.ext_size = ext_size;
 
         if(bytes > 8)
             throw new IllegalArgumentException("Are these the wrong way around ?");

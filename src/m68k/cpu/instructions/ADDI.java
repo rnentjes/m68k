@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -105,7 +106,26 @@ public class ADDI implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+        int opcode = 0x0600;
+
+        switch(instruction.size) {
+            case Word:
+                opcode |= 1 << 6;
+                break;
+            case Long:
+                opcode |= 2 << 6;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        opcode |= op2.mode.bits() << 3;
+        opcode |= op2.register;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected int addi_byte(int opcode)
