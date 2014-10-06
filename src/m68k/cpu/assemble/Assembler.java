@@ -197,7 +197,7 @@ public class Assembler {
     }
 
     public AssembledOperand parseOperand(Size size, String operand) {
-        String lower = operand.trim().toLowerCase();
+        String lower = operand.trim().toLowerCase().replaceAll("\\s", "");
 
         char ch = lower.charAt(0);
 
