@@ -103,6 +103,7 @@ public class Assembler {
     }
 
     public DisassembledInstruction parseLine(String line) {
+        OperandParser operandParser = new OperandParser();
         String lower = line.trim().toLowerCase();
 
         if (lower.isEmpty() || lower.startsWith(";")) {
@@ -122,7 +123,7 @@ public class Assembler {
             if (parts.length != 2) {
                 throw new IllegalArgumentException("Can't parse '" + line + "'");
             } else {
-                setLabel(parts[0].trim(), parseValue(parts[1].trim()));
+                setLabel(parts[0].trim(), operandParser.parseValue(parts[1].trim()));
             }
 
             return new DisassembledInstruction(pc, 0, line);
@@ -173,10 +174,10 @@ public class Assembler {
         }
 
         if (numberOfParts >= 1) {
-            operand1 = parseOperand(size, op1);
+            operand1 = operandParser.parse(size, pc, op1);
         }
         if (numberOfParts >= 2) {
-            operand2 = parseOperand(size, op2);
+            operand2 = operandParser.parse(size, pc, op2);
         }
 
         if (commandMapping.get(command) == null) {
@@ -193,122 +194,6 @@ public class Assembler {
             }
 
             return disassembled;
-        }
-    }
-
-    public AssembledOperand parseOperand(Size size, String operand) {
-        String lower = operand.trim().toLowerCase().replaceAll("\\s", "");
-
-        char ch = lower.charAt(0);
-
-        int bytes = 0;
-        int memory_read = 0;
-        AddressingMode mode = AddressingMode.NA;
-        Conditional conditional = Conditional.NA;
-        int register = 0;
-        int ext_reg = 0;
-        int ext_data = 0;
-        Size ext_size = Size.Unsized;
-
-        switch(ch) {
-            case '#':
-                mode = AddressingMode.IMMEDIATE;
-                memory_read = parseValue(operand.substring(1));
-                register = 4;
-                if (size == Size.Long) {
-                    bytes = 4;
-                } else {
-                    bytes = 2;
-                }
-                break;
-            case 'd':
-                mode = AddressingMode.IMMEDIATE_DATA;
-                register = Integer.parseInt(lower.substring(1));
-                break;
-            case 'a':
-                mode = AddressingMode.IMMEDIATE_ADDRESS;
-                register = Integer.parseInt(lower.substring(1));
-                break;
-            case 's':
-                mode = AddressingMode.SR;
-                break;
-            case 'c':
-                mode = AddressingMode.CCR;
-                break;
-            default:
-                if (lower.startsWith("-(") && lower.endsWith(")")) {
-                    // -(a0)
-                    mode = AddressingMode.INDIRECT_PRE;
-                    register = Integer.parseInt(lower.substring(3, 4));
-                } else if (lower.startsWith("(") && lower.endsWith(")+")) {
-                    // (a0)+
-                    mode = AddressingMode.INDIRECT_POST;
-                    register = Integer.parseInt(lower.substring(2, 3));
-                } else if (lower.startsWith("(") && lower.endsWith(")")) {
-                    mode = AddressingMode.INDIRECT;
-                    register = Integer.parseInt(lower.substring(2, 3));
-                } else if (lower.contains("(") && lower.endsWith(")")) {
-                    int indexOpen = lower.indexOf('(');
-                    int indexClose = lower.indexOf(')');
-                    // $1234(a1) / $12(a0, a1.w)
-                    if (!lower.contains(",")) {
-                        if (lower.contains("pc")) {
-                            // $1234(pc)
-                            mode = AddressingMode.PC_DISP;
-                            memory_read = parseValue(lower.substring(0, indexOpen));
-                            register = 2;
-                            bytes = 2;
-                        } else {
-                            // $1234(a1)
-                            mode = AddressingMode.INDIRECT_DISP;
-                            memory_read = parseValue(lower.substring(0, indexOpen));
-                            bytes = 2;
-                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
-                        }
-                    } else {
-                        if (lower.contains("pc")) {
-                            // $12(pc, d0.w)
-                            mode = AddressingMode.PC_INDEX;
-                            ext_data = parseValue(lower.substring(0, indexOpen));
-                            bytes = 2;
-                            register = 3;
-                            // todo parse
-                            ext_reg = Integer.parseInt(lower.substring(indexClose - 1, indexClose));
-                            ext_size = Size.Word;
-                        } else {
-                            // $12(a0, d0.w)
-                            mode = AddressingMode.INDIRECT_INDEX;
-                            ext_data = parseValue(lower.substring(0, indexOpen));
-                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
-                            // todo parse
-                            ext_reg = 0;
-                            ext_size = Size.Word;
-                            bytes = 2;
-                        }
-                    }
-                } else if (lower.endsWith(".w")) {
-                    mode = AddressingMode.ABSOLUTE_NEAR;
-                    memory_read = parseValue(lower.substring(0, lower.length()-2));
-                    bytes = 2;
-                } else if (lower.endsWith(".l")) {
-                    mode = AddressingMode.ABSOLUTE_FAR;
-                    bytes = 4;
-                    register = 1;
-                    memory_read = parseValue(lower.substring(0, lower.length()-2));
-                }
-                break;
-        }
-
-        return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register, ext_reg, ext_data, ext_size);
-    }
-
-    public int parseValue(String value) {
-        if (value.charAt(0) == '$') {
-            return Integer.parseInt(value.substring(1), 16);
-        } else if (value.charAt(0) == '%') {
-            return Integer.parseInt(value.substring(1), 2);
-        } else {
-            return Integer.parseInt(value);
         }
     }
 

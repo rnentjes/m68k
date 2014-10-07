@@ -114,6 +114,7 @@ public class ADDQ implements InstructionHandler
         int opcode = 0x5000;
 
         switch(instruction.size) {
+            case Unsized:
             case Word:
                 opcode |= 1 << 6;
                 break;

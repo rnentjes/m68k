@@ -107,7 +107,7 @@ public class DisassembledInstruction
             if (op2.bytes == 2) {
                 result.add((byte) ((op2.memory_read >> 8) % 256));
                 result.add((byte) ((op2.memory_read) % 256));
-            } else if (op1.bytes == 4) {
+            } else if (op2.bytes == 4) {
                 result.add((byte) ((op2.memory_read >> 24) % 256));
                 result.add((byte) ((op2.memory_read >> 16) % 256));
                 result.add((byte) ((op2.memory_read >> 8) % 256));
