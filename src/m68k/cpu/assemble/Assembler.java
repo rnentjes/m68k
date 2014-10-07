@@ -238,11 +238,11 @@ public class Assembler {
             default:
                 if (lower.startsWith("-(") && lower.endsWith(")")) {
                     // -(a0)
-                    mode = AddressingMode.INDIRECT_POST;
+                    mode = AddressingMode.INDIRECT_PRE;
                     register = Integer.parseInt(lower.substring(3, 4));
                 } else if (lower.startsWith("(") && lower.endsWith(")+")) {
                     // (a0)+
-                    mode = AddressingMode.INDIRECT_PRE;
+                    mode = AddressingMode.INDIRECT_POST;
                     register = Integer.parseInt(lower.substring(2, 3));
                 } else if (lower.startsWith("(") && lower.endsWith(")")) {
                     mode = AddressingMode.INDIRECT;
@@ -251,11 +251,12 @@ public class Assembler {
                     int indexOpen = lower.indexOf('(');
                     int indexClose = lower.indexOf(')');
                     // $1234(a1) / $12(a0, a1.w)
-                    if (lower.contains(",")) {
+                    if (!lower.contains(",")) {
                         if (lower.contains("pc")) {
                             // $1234(pc)
                             mode = AddressingMode.PC_DISP;
                             memory_read = parseValue(lower.substring(0, indexOpen));
+                            register = 2;
                             bytes = 2;
                         } else {
                             // $1234(a1)
@@ -270,9 +271,9 @@ public class Assembler {
                             mode = AddressingMode.PC_INDEX;
                             ext_data = parseValue(lower.substring(0, indexOpen));
                             bytes = 2;
-                            register = Integer.parseInt(lower.substring(indexOpen + 2, indexOpen + 3));
+                            register = 3;
                             // todo parse
-                            ext_reg = 0;
+                            ext_reg = Integer.parseInt(lower.substring(indexClose - 1, indexClose));
                             ext_size = Size.Word;
                         } else {
                             // $12(a0, d0.w)
@@ -287,8 +288,13 @@ public class Assembler {
                     }
                 } else if (lower.endsWith(".w")) {
                     mode = AddressingMode.ABSOLUTE_NEAR;
+                    memory_read = parseValue(lower.substring(0, lower.length()-2));
+                    bytes = 2;
                 } else if (lower.endsWith(".l")) {
                     mode = AddressingMode.ABSOLUTE_FAR;
+                    bytes = 4;
+                    register = 1;
+                    memory_read = parseValue(lower.substring(0, lower.length()-2));
                 }
                 break;
         }
