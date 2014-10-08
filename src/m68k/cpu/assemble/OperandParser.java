@@ -2,6 +2,7 @@ package m68k.cpu.assemble;
 
 import m68k.cpu.Size;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class OperandParser {
 
     {
         modeMapping.put("v", AddressingMode.IMMEDIATE);
+        modeMapping.put("v-", AddressingMode.IMMEDIATE);
         modeMapping.put("a", AddressingMode.IMMEDIATE_ADDRESS);
         modeMapping.put("d", AddressingMode.IMMEDIATE_DATA);
         modeMapping.put("i", AddressingMode.INDIRECT);
@@ -89,25 +91,39 @@ public class OperandParser {
         }
     }
 
-    public AssembledOperand parse(Size size, int pc,  String operand) {
+    public AssembledOperand parse(Size size, int pc, int lineNumber, String operand) throws ParseException {
         clear();
         String lower = operand.trim().toLowerCase();
         char last = ' ';
 
         for (int index = 0; index < lower.length(); index++) {
             char ch = lower.charAt(index);
+            char next = ' ';
+
+            if (index < lower.length() - 1) {
+                next = lower.charAt(index+1);
+            }
 
             switch(ch) {
                 case ',':
                 case '.':
                 case '(':
                 case ')':
+                case '/':
                     newPart();
                     break;
                 case '+':
-                case '-':
+                    if (last == ')') {
+                        setType(ch);
+                    }
                     newPart();
-                    setType(ch);
+                    current.text.append(ch);
+                    break;
+                case '-':
+                    if (next == '(') {
+                        setType(ch);
+                    }
+                    newPart();
                     current.text.append(ch);
                     break;
                 case 'a':
@@ -167,12 +183,26 @@ public class OperandParser {
         Size ext_size = Size.Unsized;
 
         if (mode == null) {
-            return null;
+            if (parts.isEmpty()) {
+                throw new ParseException("Unable to parse expression '"+operand+"'", lineNumber);
+            }
+            boolean registerList = true;
+            for (Part part : parts) {
+                if (part.type != 'd' && part.type != 'a') {
+                    registerList = false;
+                }
+            }
+
+            if (registerList) {
+                mode = AddressingMode.REGISTER_LIST;
+            } else {
+                throw new ParseException("Unable to parse expression '"+operand+"'", lineNumber);
+            }
         }
 
         switch(mode) {
             case IMMEDIATE:
-                memory_read = parseValue(parts.get(0).text.toString());
+                memory_read = parseValue(parts.get(parts.size()-1).text.toString());
                 register = 4;
                 if (size == Size.Long) {
                     bytes = 4;
@@ -228,6 +258,37 @@ public class OperandParser {
                     ext_size = Size.Word;
                 }
                 break;
+            case REGISTER_LIST:
+                int lastReg = -1;
+                for (Part part : parts) {
+                    int reg = -1;
+                    boolean dataReg = part.type == 'd';
+
+                    if (part.text.charAt(0) == '-') {
+                        // lastReg to reg
+                        reg = Integer.parseInt(Character.toString(part.text.charAt(2)));
+
+                        for (; lastReg <= reg ; lastReg++) {
+                            int or = 1 << lastReg;
+                            if (!dataReg) {
+                                or = or << 8;
+                            }
+                            register |= or;
+                        }
+                    } else {
+                        reg = Integer.parseInt(Character.toString(part.text.charAt(1)));
+
+                        int or = 1 << reg;
+                        if (!dataReg) {
+                            or = or << 8;
+                        }
+
+                        register |= or;
+                    }
+
+                    lastReg = reg;
+                }
+
         }
 
         if (mode == AddressingMode.PC_INDEX) {
@@ -271,7 +332,7 @@ public class OperandParser {
         return parts;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws ParseException {
         OperandParser parser = new OperandParser();
 
         String [] strings = {
@@ -301,10 +362,14 @@ public class OperandParser {
                 "sr",
                 "ccr",
                 "(10, a2, d1)",
+                "d1-d2/d5",
+                "a1/a3/a5/a7",
+                "xxxx"
         };
 
+        int lineNumber = 1;
         for (String str : strings) {
-            parser.parse(Size.Word, 0, str);
+            parser.parse(Size.Word, 0, lineNumber++, str);
 
             System.out.println(str + " -> " + parser.descriptor());
 

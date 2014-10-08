@@ -1,7 +1,9 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -146,7 +148,54 @@ public class MOVEM implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+        int opcode = 0x4880;
+
+        switch(instruction.size) {
+            case Long:
+                opcode |= 1 << 6;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        int memory_read1 = op1.memory_read;
+        int memory_read2 = op2.memory_read;
+
+        int bytes1 = op1.bytes;
+        int bytes2 = op2.bytes;
+
+        if (op1.mode == AddressingMode.REGISTER_LIST) {
+            bytes1 = 2;
+            memory_read1 = op1.register;
+
+            opcode |= op2.mode.bits() << 3;
+            opcode |= op2.register;
+        } else if (op2.mode == AddressingMode.REGISTER_LIST) {
+            // direction to registers
+            opcode |= 0x400;
+
+            // turn mask around
+            int register = op1.register;
+            int result = 0;
+            for (int bit = 0; bit < 32; bit++) {
+                result |= register & 0x1;
+                result = result << 1;
+                register = register >> 1;
+            }
+
+            bytes2 = 2;
+            memory_read2 = register;
+
+            opcode |= op1.mode.bits() << 3;
+            opcode |= op1.register;
+        } else {
+            // todo: illegal operant
+        }
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, bytes1, memory_read1),
+                new DisassembledOperand(op2.operand, bytes2, memory_read2));
     }
 
     protected final int movem_word_r2m(int opcode)
@@ -449,7 +498,7 @@ public class MOVEM implements InstructionHandler
 
 		return regcount;
 	}
-	
+
 	protected final int getMultipleWordPostInc(int reg, int reglist, int address)
 	{
 		int bit = 1;

@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -30,7 +31,14 @@ public class Assembler {
     private static Map<String, InstructionHandler> commandMapping = new HashMap<String, InstructionHandler>();
 
     {
+        // data transfer instructions
+        commandMapping.put("exg", new EXG(null));
+        commandMapping.put("lea", new LEA(null));
+        commandMapping.put("link", new LINK(null));
         commandMapping.put("move", new MOVE(null));
+        commandMapping.put("movea", new MOVE(null));
+        commandMapping.put("movem", new MOVEM(null));
+
         commandMapping.put("add", new ADD(null));
         commandMapping.put("adda", new ADDA(null));
         commandMapping.put("addi", new ADDI(null));
@@ -46,6 +54,14 @@ public class Assembler {
 
     public Assembler(AddressSpace mmu) {
         this.mmu = mmu;
+    }
+
+    public int getPc() {
+        return pc;
+    }
+
+    public void setPc(int pc) {
+        this.pc = pc;
     }
 
     private int getLabel(String label) {
@@ -102,7 +118,11 @@ public class Assembler {
         return labelLocations.get(label);
     }
 
-    public DisassembledInstruction parseLine(String line) {
+    public DisassembledInstruction parseLine(String line) throws ParseException {
+        return parseLine(-1, line);
+    }
+
+    public DisassembledInstruction parseLine(int lineNumber, String line) throws ParseException {
         OperandParser operandParser = new OperandParser();
         String lower = line.trim().toLowerCase();
 
@@ -174,14 +194,14 @@ public class Assembler {
         }
 
         if (numberOfParts >= 1) {
-            operand1 = operandParser.parse(size, pc, op1);
+            operand1 = operandParser.parse(size, pc, lineNumber, op1);
         }
         if (numberOfParts >= 2) {
-            operand2 = operandParser.parse(size, pc, op2);
+            operand2 = operandParser.parse(size, pc, lineNumber,op2);
         }
 
         if (commandMapping.get(command) == null) {
-            throw new IllegalArgumentException("Mnemonic '"+command+"' not found!");
+            throw new ParseException("Mnemonic '"+command+"' not found!", lineNumber);
         } else {
             InstructionHandler handler = commandMapping.get(command);
 
@@ -203,7 +223,7 @@ public class Assembler {
         }
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         MemorySpace memory = new MemorySpace(512);
         Assembler asm = new Assembler(memory);
         String filename = "test.asm";

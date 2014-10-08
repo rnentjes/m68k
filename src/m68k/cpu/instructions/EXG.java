@@ -1,7 +1,9 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -102,7 +104,34 @@ public class EXG implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+        int opcode = 0xc100;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        if (op1.mode == AddressingMode.IMMEDIATE_DATA && op2.mode == AddressingMode.IMMEDIATE_DATA) {
+            opcode |= 0x40;
+            opcode |= op1.register << 9;
+            opcode |= op2.register;
+        } else if (op1.mode == AddressingMode.IMMEDIATE_ADDRESS && op2.mode == AddressingMode.IMMEDIATE_ADDRESS) {
+            opcode |= 0x48;
+            opcode |= op1.register << 9;
+            opcode |= op2.register;
+        } else if (op1.mode == AddressingMode.IMMEDIATE_ADDRESS) {
+            opcode |= 0x88;
+
+            opcode |= op1.register;
+            opcode |= op2.register << 9;
+        } else {
+            opcode |= 0x88;
+
+            opcode |= op1.register << 9;
+            opcode |= op2.register;
+        }
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int exg_dd(int opcode)
