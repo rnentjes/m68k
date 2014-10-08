@@ -61,6 +61,32 @@ public class TestDataTransfer extends AssemblerTestCase {
     public void testMovem() {
         checkAsm("movem.w d2/d3, (a0)", "4890 000c");
         checkAsm("movem.w (a0), d2/d3", "4c90 000c");
+        checkAsm("movem.l (a5), d1/d3-d6/d7-a2/a5",         "4cd5 27fa");
+        checkAsm("movem.l d1/d3-d6/d7-a3/a6, ($400, a2)",   "48ea 4ffa 0400");
+        checkAsm("movem.l d1-a7, ($10, a2, d0)",            "48f2 fffe 0010");
     }
+
+    public void testMoveq() {
+        checkAsm("moveq #1, d0", "7001");
+        checkAsm("moveq #40, d7", "7e28 ");
+    }
+
+    public void testMovep() {
+        checkAsm("movep.l d3, (4,a2)", "07ca 0004");
+        checkAsm("movep.w d4, (6,a3)", "098b 0006");
+    }
+
+    public void testPea() {
+        checkAsm("pea (a0)",            "4850");
+        checkAsm("pea (10, a0)",        "4868 000a");
+        checkAsm("pea (10, a0, d3.w)",  "4870 300a");
+        checkAsm("pea (10, a3, d7.w)",  "4873 700a");
+    }
+
+    public void testUnlk() {
+        checkAsm("unlk a1", "4e59");
+        checkAsm("unlk a6", "4e5e");
+    }
+
 
 }

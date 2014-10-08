@@ -75,6 +75,7 @@ public class Bcc implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+
         return null;
     }
 

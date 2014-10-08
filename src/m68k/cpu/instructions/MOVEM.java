@@ -165,9 +165,23 @@ public class MOVEM implements InstructionHandler
         int bytes1 = op1.bytes;
         int bytes2 = op2.bytes;
 
+        // turn mask around
+        int register = op1.mode == AddressingMode.REGISTER_LIST ? op1.register : op2.register;
+        int swappedRegister = 0;
+        for (int bit = 0; bit < 32; bit++) {
+            swappedRegister |= register & 0x1;
+            swappedRegister = swappedRegister << 1;
+            register = register >> 1;
+        }
+
         if (op1.mode == AddressingMode.REGISTER_LIST) {
             bytes1 = 2;
-            memory_read1 = op1.register;
+
+            if (op2.mode == AddressingMode.INDIRECT_PRE) {
+                memory_read1 = swappedRegister;
+            } else {
+                memory_read1 = op1.register;
+            }
 
             opcode |= op2.mode.bits() << 3;
             opcode |= op2.register;
@@ -175,17 +189,13 @@ public class MOVEM implements InstructionHandler
             // direction to registers
             opcode |= 0x400;
 
-            // turn mask around
-            int register = op1.register;
-            int result = 0;
-            for (int bit = 0; bit < 32; bit++) {
-                result |= register & 0x1;
-                result = result << 1;
-                register = register >> 1;
-            }
-
             bytes2 = 2;
-            memory_read2 = register;
+
+            if (op1.mode == AddressingMode.INDIRECT_PRE) {
+                memory_read2 = swappedRegister;
+            } else {
+                memory_read2 = op2.register;
+            }
 
             opcode |= op1.mode.bits() << 3;
             opcode |= op1.register;

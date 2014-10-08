@@ -18,7 +18,7 @@ public class OperandParser {
 
     {
         modeMapping.put("v", AddressingMode.IMMEDIATE);
-        modeMapping.put("v-", AddressingMode.IMMEDIATE);
+        modeMapping.put("vv", AddressingMode.IMMEDIATE);
         modeMapping.put("a", AddressingMode.IMMEDIATE_ADDRESS);
         modeMapping.put("d", AddressingMode.IMMEDIATE_DATA);
         modeMapping.put("i", AddressingMode.INDIRECT);
@@ -260,6 +260,7 @@ public class OperandParser {
                 break;
             case REGISTER_LIST:
                 int lastReg = -1;
+                char lastType = ' ';
                 for (Part part : parts) {
                     int reg = -1;
                     boolean dataReg = part.type == 'd';
@@ -268,12 +269,24 @@ public class OperandParser {
                         // lastReg to reg
                         reg = Integer.parseInt(Character.toString(part.text.charAt(2)));
 
-                        for (; lastReg <= reg ; lastReg++) {
-                            int or = 1 << lastReg;
-                            if (!dataReg) {
-                                or = or << 8;
+                        if (lastType == 'd' && !dataReg) {
+                            for (; lastReg <= 7; lastReg++) {
+                                int or = 1 << lastReg;
+                                register |= or;
                             }
-                            register |= or;
+                            lastReg = 0;
+                            for (; lastReg <= reg; lastReg++) {
+                                int or = 1 << lastReg << 8;
+                                register |= or;
+                            }
+                        } else {
+                            for (; lastReg <= reg; lastReg++) {
+                                int or = 1 << lastReg;
+                                if (!dataReg) {
+                                    or = or << 8;
+                                }
+                                register |= or;
+                            }
                         }
                     } else {
                         reg = Integer.parseInt(Character.toString(part.text.charAt(1)));
@@ -287,6 +300,7 @@ public class OperandParser {
                     }
 
                     lastReg = reg;
+                    lastType = part.type;
                 }
 
         }

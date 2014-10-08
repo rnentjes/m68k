@@ -38,11 +38,33 @@ public class Assembler {
         commandMapping.put("move", new MOVE(null));
         commandMapping.put("movea", new MOVE(null));
         commandMapping.put("movem", new MOVEM(null));
+        commandMapping.put("moveq", new MOVEQ(null));
+        commandMapping.put("movep", new MOVEP(null));
+        commandMapping.put("pea", new PEA(null));
+        commandMapping.put("unlk", new UNLK(null));
 
         commandMapping.put("add", new ADD(null));
         commandMapping.put("adda", new ADDA(null));
         commandMapping.put("addi", new ADDI(null));
         commandMapping.put("addq", new ADDQ(null));
+
+
+        commandMapping.put("bra", new Bcc(null));
+        commandMapping.put("bsr", new Bcc(null));
+        commandMapping.put("bhi", new Bcc(null));
+        commandMapping.put("bls", new Bcc(null));
+        commandMapping.put("bcc", new Bcc(null));
+        commandMapping.put("bcs", new Bcc(null));
+        commandMapping.put("bne", new Bcc(null));
+        commandMapping.put("beq", new Bcc(null));
+        commandMapping.put("bvc", new Bcc(null));
+        commandMapping.put("bvs", new Bcc(null));
+        commandMapping.put("bpl", new Bcc(null));
+        commandMapping.put("bmi", new Bcc(null));
+        commandMapping.put("bge", new Bcc(null));
+        commandMapping.put("blt", new Bcc(null));
+        commandMapping.put("bgt", new Bcc(null));
+        commandMapping.put("ble", new Bcc(null));
     }
 
     public SortedSet<Binary> assemble(String [] source) {
@@ -122,6 +144,55 @@ public class Assembler {
         return parseLine(-1, line);
     }
 
+    private List<String> splitLine(String line) {
+        List<String> result = new LinkedList<String>();
+
+        int part = 0; // 1=mnem, 2=op1, 3=op2
+        int inPar = 0;
+        StringBuilder current = new StringBuilder();
+        for(int index = 0; index < line.length(); index++) {
+            char ch = line.charAt(index);
+
+            switch(ch) {
+                case '\t':
+                case ' ':
+                    if (part == 1) {
+                        result.add(current.toString());
+                        current = new StringBuilder();
+                        part = 2;
+                    }
+                    break;
+                case '(':
+                    current.append(ch);
+                    inPar++;
+                    break;
+                case ')':
+                    current.append(ch);
+                    inPar--;
+                    break;
+                case ',':
+                    if (inPar == 0) {
+                        result.add(current.toString());
+                        current = new StringBuilder();
+                        part++;
+                    } else {
+                        current.append(ch);
+                    }
+                    break;
+                default:
+                    if (part == 0) {
+                        part = 1;
+                    }
+                    current.append(ch);
+                    break;
+            }
+        }
+
+        result.add(current.toString());
+
+        return result;
+    }
+
     public DisassembledInstruction parseLine(int lineNumber, String line) throws ParseException {
         OperandParser operandParser = new OperandParser();
         String lower = line.trim().toLowerCase();
@@ -151,7 +222,6 @@ public class Assembler {
 
         String mnemonic = lower;
         String command;
-        String ops;
         String op1 = "";
         String op2 = "";
         Size size = Size.Unsized;
@@ -159,19 +229,19 @@ public class Assembler {
         AssembledOperand operand1 = new AssembledOperand("", 0, 0);
         AssembledOperand operand2 = new AssembledOperand("", 0, 0);
 
-        if (lower.indexOf(' ') > 0) {
-            mnemonic = lower.substring(0, lower.indexOf(' '));
-            ops = lower.substring(lower.indexOf(' ')).trim();
-            int lastComma = ops.lastIndexOf(',');
+        List<String> parts = splitLine(lower);
 
-            if (lastComma == -1) {
-                numberOfParts = 1;
-                op1 = ops.trim();
-            } else {
-                numberOfParts = 2;
-                op1 = ops.substring(0, lastComma).trim();
-                op2 = ops.substring(lastComma+1).trim();
-            }
+        if (parts.size() > 0) {
+            mnemonic = parts.get(0);
+        }
+
+        if (parts.size() == 2) {
+            numberOfParts = 1;
+            op1 = parts.get(1);
+        } else if (parts.size() == 3) {
+            numberOfParts = 2;
+            op1 = parts.get(1);
+            op2 = parts.get(2);
         }
 
         if (mnemonic.indexOf('.') > -1) {

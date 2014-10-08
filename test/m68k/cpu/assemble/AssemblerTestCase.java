@@ -27,23 +27,21 @@ public abstract class AssemblerTestCase extends TestCase {
             DisassembledInstruction di = asm.parseLine(asmline);
             int index = 0;
 
+            StringBuilder checkBytes = new StringBuilder();
             for (Byte byt : di.bytes()) {
-                assertTrue(bytes.length() >= index + 2);
-
-                byte ref = (byte) Integer.parseInt(bytes.substring(index, index + 2), 16);
-
-                assertEquals("Wrong opcodes: '" + asmline + "' -> " + bytes, byt.byteValue(), ref);
-
-                index += 2;
-
-                while (index < bytes.length() - 1 && bytes.charAt(index) == ' ') {
-                    index++;
+                if (index > 0 && index % 2 == 0) {
+                    checkBytes.append(" ");
                 }
+                String hex = Integer.toHexString((byt & 0xff));
+
+                if (hex.length() == 1) {
+                    checkBytes.append("0");
+                }
+                checkBytes.append(hex);
+                index++;
             }
 
-            while(index < bytes.length()) {
-                assertTrue("Not enough opcodes!", bytes.charAt(index) == ' ');
-            }
+            assertEquals("Wrong opcodes: '" + asmline + "'", bytes.trim(), checkBytes.toString().trim());
         } catch (ParseException e) {
             assertFalse("ParseException in line "+ e.getErrorOffset() + ": '" + asmline + "' -> " + bytes , true);
         }

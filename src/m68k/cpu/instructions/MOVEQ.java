@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -62,7 +63,17 @@ public class MOVEQ implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+        int opcode = 0x7000;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        opcode |= op2.register << 9;
+        opcode |= op1.memory_read & 0xff;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, 0, op1.memory_read),
+                new DisassembledOperand(op2.operand, 0, op2.memory_read));
     }
 
     protected final int moveq(int opcode)
