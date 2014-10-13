@@ -7,12 +7,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Date: 7-10-14
  * Time: 21:29
  */
 public class OperandParser {
+
+    private static Pattern labelPattern = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]+");
 
     private static Map<String, AddressingMode> modeMapping = new HashMap<String, AddressingMode>();
 
@@ -184,8 +188,13 @@ public class OperandParser {
 
         if (mode == null) {
             if (parts.isEmpty()) {
-                throw new ParseException("Unable to parse expression '"+operand+"'", lineNumber);
+                if (couldBeLabel(operand)) {
+                    mode = AddressingMode.LABEL;
+                } else {
+                    throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
+                }
             }
+
             boolean registerList = true;
             for (Part part : parts) {
                 if (part.type != 'd' && part.type != 'a') {
@@ -302,6 +311,7 @@ public class OperandParser {
                     lastReg = reg;
                     lastType = part.type;
                 }
+                break;
 
         }
 
@@ -321,6 +331,12 @@ public class OperandParser {
         }
 
         return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register);
+    }
+
+    private boolean couldBeLabel(String operand) {
+        Matcher matcher = labelPattern.matcher(operand);
+
+        return matcher.matches();
     }
 
     public int parseValue(String value) {

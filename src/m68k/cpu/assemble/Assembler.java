@@ -48,7 +48,6 @@ public class Assembler {
         commandMapping.put("addi", new ADDI(null));
         commandMapping.put("addq", new ADDQ(null));
 
-
         commandMapping.put("bra", new Bcc(null));
         commandMapping.put("bsr", new Bcc(null));
         commandMapping.put("bhi", new Bcc(null));
@@ -282,6 +281,8 @@ public class Assembler {
             for (Byte byt : disassembled.bytes()) {
                 mmu.writeByte(pc++, byt);
             }
+
+            // todo: labels
 
             return disassembled;
         }

@@ -21,7 +21,8 @@ public enum AddressingMode {
     PC_INDEX(3, 7),
     SR(1, 0),
     CCR(1, 0),
-    REGISTER_LIST(1, 0)
+    REGISTER_LIST(1, 0),
+    LABEL(1,0)
     ;
 
     private int requiredOperants;
