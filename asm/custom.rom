@@ -1,0 +1,30 @@
+*-----------------------------------------------------------
+* Title      :
+* Written by :
+* Date       :
+* Description:
+*-----------------------------------------------------------
+    ORG    $0
+    DC.W   $1111
+
+INIT:                  ; first instruction of program
+
+* Put program code here
+
+    JMP $FC00D2
+
+    ; Skip to Start
+    DS.B $CA
+
+START:
+    MOVE.W $0, D0
+
+    lea     DFF000,A4
+LOOP:
+    move.w  DO,$0180(A4)
+    INC     D0
+    JMP     LOOP
+
+END:
+    JMP END
+    END START
