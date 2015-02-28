@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -188,11 +187,11 @@ public class OperandParser {
 
         if (mode == null) {
             if (parts.isEmpty()) {
-                if (couldBeLabel(operand)) {
-                    mode = AddressingMode.LABEL;
-                } else {
-                    throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
-                }
+//                if (couldBeLabel(operand)) {
+//                    mode = AddressingMode.LABEL;
+//                } else {
+//                    throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
+//                }
             }
 
             boolean registerList = true;
@@ -311,7 +310,6 @@ public class OperandParser {
                     lastReg = reg;
                     lastType = part.type;
                 }
-                break;
 
         }
 
@@ -331,12 +329,6 @@ public class OperandParser {
         }
 
         return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register);
-    }
-
-    private boolean couldBeLabel(String operand) {
-        Matcher matcher = labelPattern.matcher(operand);
-
-        return matcher.matches();
     }
 
     public int parseValue(String value) {

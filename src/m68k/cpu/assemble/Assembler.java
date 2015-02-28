@@ -139,6 +139,20 @@ public class Assembler {
         return labelLocations.get(label);
     }
 
+
+    private AssembledOperand handleLabel(Size size, AssembledOperand instruction) {
+        AssembledOperand result = instruction;
+
+        if (instruction instanceof LabelOperand) {
+            String label = ((LabelOperand) instruction).operand;
+            int pc = ((LabelOperand) instruction).memory_read;
+
+            setLabel(label, pc);
+        }
+
+        return result;
+    }
+
     public DisassembledInstruction parseLine(String line) throws ParseException {
         return parseLine(-1, line);
     }
@@ -273,6 +287,9 @@ public class Assembler {
             throw new ParseException("Mnemonic '"+command+"' not found!", lineNumber);
         } else {
             InstructionHandler handler = commandMapping.get(command);
+
+            //handleLabel(operand1);
+            //handleLabel(operand2);
 
             AssembledInstruction instruction = new AssembledInstruction(mnemonic, size, operand1, operand2);
 

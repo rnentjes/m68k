@@ -16,7 +16,7 @@ public class Disassemble {
 
     public static void main(String[] args) throws Exception {
 
-        File file = new File("a.out");
+        File file = new File("kick13.rom");
         byte [] data = new byte[(int) file.length()];
 
         FileInputStream in = new FileInputStream(file);
