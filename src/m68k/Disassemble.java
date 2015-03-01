@@ -16,8 +16,8 @@ public class Disassemble {
 
     public static void main(String[] args) throws Exception {
 
-        //File file = new File("asm/custom.rom");
-        File file = new File("asm/Kickstart1.3.rom");
+        File file = new File("asm/custom.rom");
+        //File file = new File("asm/Kickstart1.3.rom");
         byte [] data = new byte[(int) file.length()];
 
         FileInputStream in = new FileInputStream(file);
