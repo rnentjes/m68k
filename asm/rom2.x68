@@ -40,11 +40,13 @@ WAIT:
     MOVE.L  A0, SP
     MOVE.L  A1, USP
 
-    move.w    #$1000, BPLCON0(A4) ; BPLCON0 = Blank screen.
+    move.w    #$1200, BPLCON0(A4) ; BPLCON0 = Blank screen.
     move.w    #$AAAA, BPL1DAT(A4) ; Bitplane 0 data = all zeros.
     move.w    #$0444, COLOR00(A4) ; Background colour = dark gray.
     move.w    #$0CCC, COLOR01(A4) ; Color 1 = light gray.
 
+	move.w	#$2c81,DIWSTRT(a4)   	; DIWSTRT - topleft corner (2c81)
+	move.w	#$f4d1,DIWSTOP(a4)      ; DIWSTOP - bottomright corner (f4d1)
     MOVE.W  #$0038,DDFSTRT(a4)      ; Write to DDFSTRT
     MOVE.W  #$00D0,DDFSTOP(a4)      ; Write to DDFSTOP
     MOVE.W  #0,BPL1MOD(a4)
@@ -72,9 +74,7 @@ COPYCOP:
 
     MOVE.W  #1, COPJMP1(A4)
 
-    move.w  #$C180, DMACON(A4)  ; Enable copper and bitplanes
-
-
+    move.w  #$8080, DMACON(A4)  ; Enable copper and bitplanes
 
 
         ; Set vector interrupts
@@ -98,7 +98,8 @@ VECTOR_LOOP:
     move.w  #$c020,$9a(A4)       ; intena bit set and 5 (vbl)
 
 
-
+    LEA       $1000, A0
+    ADD.L     #1, (A0)
 
 HALT:
     JMP HALT
@@ -109,6 +110,8 @@ EMPTY_INTERRUPT:
     RTE
 
 VBLANK_INTERRUPT:
+    LEA       $1000, A0
+    ADD.L     #1, (A0)
     move.w    #$0020,D0
     move.w    D0,INTREQ(A4)      ; Clear vblank interrupt.
     RTE
