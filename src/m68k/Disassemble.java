@@ -16,7 +16,8 @@ public class Disassemble {
 
     public static void main(String[] args) throws Exception {
 
-        File file = new File("kick13.rom");
+        //File file = new File("asm/custom.rom");
+        File file = new File("asm/Kickstart1.3.rom");
         byte [] data = new byte[(int) file.length()];
 
         FileInputStream in = new FileInputStream(file);
@@ -36,7 +37,8 @@ public class Disassemble {
 
         Monitor monitor = new Monitor(cpu,memory);
 
-        monitor.handleDisassemble(new String [] { "d", "0", "10" });
+        monitor.run();
+        //monitor.handleDisassemble(new String [] { "d", "0", "10" });
 
     }
 }
