@@ -33,7 +33,6 @@ WAIT:
     move.w    D0, INTREQ(A4)      ; Clear all pending interrupts.
     move.w    D0, DMACON(A4)      ; Disable all DMA.
 
-
     ; 6kb for stacks
     ; assume 512kb chip at least
     LEA     $80000, A0
@@ -91,22 +90,15 @@ CLOOP:
 
     move.w  #$c380, DMACON(A4)  ; Enable copper & bitplane DMA
 
-    ; clear pending interrupts
-    move.w    #$7FFF,D0
-    move.w    D0, INTREQ(A4)      ; Clear vblank interrupt.
-    move.w    D0, INTREQ(A4)      ; Clear vblank interrupt.
-
-    ;move.w  #$230, VBSTRT(A4)
-    ;move.w  #$020, VBSTOP(A4)
+    move.w  #$230, VBSTRT(A4)
+    move.w  #$020, VBSTOP(A4)
 
     ; enable vblank interrupt
     ; $c020
-    move.w  #%1100000000110000, INTENA(A4)       ; intena bit set and 5 (vbl)
+    move.w   #$c030, INTENA(A4) ; intena bit set and 5 (vbl)
 
-    LEA     $1000, A0
-    ADD.L   #1, (A0)
-
-    move.w  #$8020, INTREQ(A4)       ; intena bit set and 5 (vbl)
+    ; enable interrupts in sr register
+    move.w  #$2200, sr
 
     MOVEQ.L #0, D0
     LEA     $1004, A0
@@ -115,12 +107,16 @@ HALT:
     ADD.L   #1, (A0)
     JMP HALT
 
-
 EMPTY_INTERRUPT:
     MOVEM     A0/A4/D0, -(SP)
     LEA       $DFF000, A4
     LEA       $1008, A0
     ADD.L     #1, (A0)
+
+    LEA       $100E, A0
+    MOVE.w    INTREQR(A4), D7
+    MOVE.w    D7, (a0)
+
     move.w    #$7FFF,D0
     move.w    D0, INTREQ(A4)      ; Clear all pending interrupts.
     MOVEM     (SP)+, A0/A4/D0
@@ -151,6 +147,6 @@ COPPERSTART:
     DC.W $180, $008F   ; Move white into register $0180 (COLOR00)
     DC.W $9601,$FF00   ; Wait for line 150, ignore horiz. position
     DC.W $180, $0F80   ; Move white into register $0180 (COLOR00)
-    DC.W INTREQ, $8010   ; Move white into register $0180 (COLOR00)
+    DC.W INTREQ, $8020
     DC.W $FFFF, $FFFE
 
