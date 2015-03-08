@@ -183,8 +183,8 @@ public class ADDX implements InstructionHandler
             throw new IllegalStateException("Illegal addressing mode!");
         }
 
-        opcode |= op1.register << 9;
-        opcode |= op2.register;
+        opcode |= op1.register;
+        opcode |= op2.register << 9;
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,
                 new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),

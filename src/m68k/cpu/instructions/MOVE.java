@@ -189,6 +189,7 @@ public class MOVE implements InstructionHandler
             case Byte:
                 opcode |= 0x1000;
                 break;
+            case Unsized:
             case Word:
                 opcode |= 0x3000;
                 break;

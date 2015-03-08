@@ -100,19 +100,6 @@ public class Assembler {
         this.pc = pc;
     }
 
-    private AssembledOperand handleLabel(Size size, AssembledOperand instruction) {
-        AssembledOperand result = instruction;
-
-        if (instruction instanceof LabelOperand) {
-            String label = ((LabelOperand) instruction).operand;
-            int pc = ((LabelOperand) instruction).memory_read;
-
-            labels.addLabel(label, pc);
-        }
-
-        return result;
-    }
-
     public DisassembledInstruction parseLine(String line) throws ParseException {
         return parseLine(-1, line);
     }
@@ -172,7 +159,7 @@ public class Assembler {
 
         if (lower.isEmpty() || lower.startsWith(";")) {
             // comment
-            return new DisassembledInstruction(pc, 0, line);
+            return new DisassembledInstruction(pc, -1, line);
         }
 
         if (lower.endsWith(":")) {
@@ -182,7 +169,7 @@ public class Assembler {
         }
 
         if (lower.contains(" equ ")) {
-            String [] parts = lower.split("equ");
+            String[] parts = lower.split("equ");
 
             if (parts.length != 2) {
                 throw new IllegalArgumentException("Can't parse '" + line + "'");
@@ -237,14 +224,14 @@ public class Assembler {
         }
 
         if (numberOfParts >= 1) {
-            operand1 = operandParser.parse(size, pc, lineNumber, op1);
+            operand1 = operandParser.parse(labels, size, pc, lineNumber, op1);
         }
         if (numberOfParts >= 2) {
-            operand2 = operandParser.parse(size, pc, lineNumber,op2);
+            operand2 = operandParser.parse(labels, size, pc, lineNumber, op2);
         }
 
         if (commandMapping.get(command) == null) {
-            throw new ParseException("Mnemonic '"+command+"' not found!", lineNumber);
+            throw new ParseException("Mnemonic '" + command + "' not found!", lineNumber);
         } else {
             InstructionHandler handler = commandMapping.get(command);
 

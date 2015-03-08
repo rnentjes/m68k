@@ -66,6 +66,7 @@ public class OperandParser {
      * c - ccr register
      * w - word
      * l - long
+     * b - could be labal
      */
     private static class Part {
         public char type = ' ';
@@ -94,7 +95,7 @@ public class OperandParser {
         }
     }
 
-    public AssembledOperand parse(Size size, int pc, int lineNumber, String operand) throws ParseException {
+    public AssembledOperand parse(Labels labels, Size size, int pc, int lineNumber, String operand) throws ParseException {
         clear();
         String lower = operand.trim().toLowerCase();
         char last = ' ';
@@ -187,24 +188,34 @@ public class OperandParser {
 
         if (mode == null) {
             if (parts.isEmpty()) {
-//                if (couldBeLabel(operand)) {
-//                    mode = AddressingMode.LABEL;
-//                } else {
-//                    throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
-//                }
-            }
-
-            boolean registerList = true;
-            for (Part part : parts) {
-                if (part.type != 'd' && part.type != 'a') {
-                    registerList = false;
+                if (couldBeLabel(operand)) {
+                    mode = AddressingMode.LABEL;
+                } else {
+                    throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
                 }
-            }
-
-            if (registerList) {
-                mode = AddressingMode.REGISTER_LIST;
             } else {
-                throw new ParseException("Unable to parse expression '"+operand+"'", lineNumber);
+                boolean registerList = true;
+
+                for (Part part : parts) {
+                    if (part.type != 'd' && part.type != 'a') {
+                        registerList = false;
+                    }
+                }
+
+                if (registerList) {
+                    mode = AddressingMode.REGISTER_LIST;
+                } else {
+                    if (couldBeLabel(operand)) {
+                        mode = AddressingMode.LABEL;
+                        memory_read = labels.getLabel(operand, 0, false, Size.Unsized);
+
+                        if (memory_read == -1) {
+                            throw new ParseException("Unkown label "+operand, lineNumber);
+                        }
+                    } else {
+                        throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);
+                    }
+                }
             }
         }
 
@@ -310,7 +321,16 @@ public class OperandParser {
                     lastReg = reg;
                     lastType = part.type;
                 }
-
+                break;
+            case LABEL:
+                mode = AddressingMode.IMMEDIATE;
+                if (size == Size.Long) {
+                    bytes = 4;
+                } else {
+                    bytes = 2;
+                }
+                register = 4;
+                break;
         }
 
         if (mode == AddressingMode.PC_INDEX) {
@@ -329,6 +349,20 @@ public class OperandParser {
         }
 
         return new AssembledOperand(lower, bytes, memory_read, mode, conditional, register);
+    }
+
+    private boolean couldBeLabel(String value) {
+        for (int index = 0; index < value.length(); index++) {
+            char ch = value.charAt(index);
+
+            if (!(ch >= 'a' && ch <='z') && index == 0) {
+                return false;
+            } if (!(ch >= 'a' && ch <='z') && !(ch >= '0' && ch <='9')) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public int parseValue(String value) {
@@ -391,7 +425,7 @@ public class OperandParser {
 
         int lineNumber = 1;
         for (String str : strings) {
-            parser.parse(Size.Word, 0, lineNumber++, str);
+            parser.parse(null, Size.Word, 0, lineNumber++, str);
 
             System.out.println(str + " -> " + parser.descriptor());
 
