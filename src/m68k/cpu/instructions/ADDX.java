@@ -1,7 +1,9 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -160,7 +162,33 @@ public class ADDX implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = 0xd100;
+
+        switch (instruction.size) {
+            case Long:
+                opcode |= 0x80;
+                break;
+            default:
+                opcode |= 0x40;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        if (op1.mode == AddressingMode.INDIRECT_PRE && op2.mode == AddressingMode.INDIRECT_PRE) {
+            opcode |= 0x8;
+        } else if (op1.mode != AddressingMode.IMMEDIATE_DATA || op2.mode != AddressingMode.IMMEDIATE_DATA) {
+            // error
+            throw new IllegalStateException("Illegal addressing mode!");
+        }
+
+        opcode |= op1.register << 9;
+        opcode |= op2.register;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected int addx_byte_reg(int opcode)

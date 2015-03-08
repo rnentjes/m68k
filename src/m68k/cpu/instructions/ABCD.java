@@ -89,7 +89,7 @@ public class ABCD implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        int opcode = 0x6100;
+        int opcode = 0xC100;
 
         AssembledOperand op1 = (AssembledOperand) instruction.op1;
         AssembledOperand op2 = (AssembledOperand) instruction.op2;

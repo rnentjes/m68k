@@ -66,6 +66,21 @@ public class MC68000 extends CpuCore implements InstructionSet
 		}
 	}
 
+    public Instruction fetchInstruction() {
+        int opcode = fetchPCWord();
+
+        Instruction result = i_table[opcode];
+        if (result == null) {
+            // Illegal Instruction
+            System.err.format("Illegal instruction $%04x at $%x\n", opcode, currentInstructionAddress);
+            raiseException(4);
+            return null;
+            // throw new IllegalArgumentException("Invalid opcode: 0x" + Integer.toHexString(opcode));
+        }
+
+        return result;
+    }
+
 	protected void loadInstructionSet()
 	{
 		new ABCD(this).register(this);

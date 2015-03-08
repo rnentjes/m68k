@@ -1,8 +1,6 @@
 package m68k.cpu.assemble;
 
-import m68k.cpu.DisassembledInstruction;
-import m68k.cpu.InstructionHandler;
-import m68k.cpu.Size;
+import m68k.cpu.*;
 import m68k.cpu.instructions.*;
 import m68k.memory.AddressSpace;
 import m68k.memory.MemorySpace;
@@ -40,12 +38,19 @@ public class Assembler {
         commandMapping.put("pea", new PEA(null));
         commandMapping.put("unlk", new UNLK(null));
 
+        // arithmetic
         commandMapping.put("abcd", new ABCD(null));
         commandMapping.put("add", new ADD(null));
         commandMapping.put("adda", new ADDA(null));
         commandMapping.put("addi", new ADDI(null));
         commandMapping.put("addq", new ADDQ(null));
+        commandMapping.put("addx", new ADDX(null));
 
+        // logical
+        commandMapping.put("and", new AND(null));
+
+
+        // control flow
         commandMapping.put("bra", new Bcc(null));
         commandMapping.put("bsr", new Bcc(null));
         commandMapping.put("bhi", new Bcc(null));
@@ -289,6 +294,30 @@ public class Assembler {
         reader.close();
 
         asm.printSymbols();
+
+        System.out.println("Dissassembled:");
+
+        MC68000 m68 = new MC68000();
+
+        m68.setAddressSpace(memory);
+        m68.reset();
+
+        int pc = 0;
+        boolean done = false;
+        while (pc < asm.getPc()) {
+            int opcode = m68.readMemoryWord(pc);
+            Instruction inst = m68.getInstructionFor(opcode);
+
+            if (inst != null) {
+                DisassembledInstruction di = inst.disassemble(pc, opcode);
+
+                pc += di.size();
+
+                System.out.println(di);
+            } else {
+                done = true;
+            }
+        }
     }
 
 }

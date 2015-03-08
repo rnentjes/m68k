@@ -69,6 +69,7 @@ public abstract class CpuCore implements Cpu
 		reg_ssp = memory.readLong(0);
 		addr_regs[7] = reg_ssp;
 		reg_pc = memory.readLong(4);
+        reg_pc = 0;
 		//supervisor mode, interrupts enabled
 		reg_sr = 0x2700;
 	}
