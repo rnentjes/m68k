@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -104,7 +105,7 @@ public class ANDI implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         return null;
     }
 
@@ -117,7 +118,7 @@ public class ANDI implements InstructionHandler
 		dst.setByte(r);
 		if(!dst.isSR())
 			cpu.calcFlags(InstructionType.AND, s, d, r, Size.Byte);
-		
+
 		return (dst.isRegisterMode() ? 8 : 12 + dst.getTiming());
 	}
 

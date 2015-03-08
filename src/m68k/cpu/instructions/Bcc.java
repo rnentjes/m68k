@@ -1,7 +1,15 @@
 package m68k.cpu.instructions;
 
-import m68k.cpu.*;
+import m68k.cpu.Cpu;
+import m68k.cpu.CpuUtils;
+import m68k.cpu.DisassembledInstruction;
+import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Instruction;
+import m68k.cpu.InstructionHandler;
+import m68k.cpu.InstructionSet;
+import m68k.cpu.Size;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -32,6 +40,7 @@ public class Bcc implements InstructionHandler
 	protected final Cpu cpu;
 	protected static final String[] names = { "bra", "bsr", "bhi", "bls", "bcc", "bcs", "bne", "beq",
 												"bvc", "bvs", "bpl", "bmi", "bge", "blt", "bgt", "ble"};
+
 	public Bcc(Cpu cpu)
 	{
 		this.cpu = cpu;
@@ -74,9 +83,81 @@ public class Bcc implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
+        int opcode = nameToOpcode(instruction.instruction);
 
-        return null;
+        if (opcode == -1) {
+            throw new IllegalStateException("Unknown opcode "+instruction.instruction);
+        }
+
+        opcode = opcode << 8;
+        opcode |= 0x6000;
+
+        DisassembledOperand op1 = instruction.op1;
+
+        Size size = instruction.size;
+
+        int labelAddress;
+
+        switch (size) {
+            case Byte:
+                labelAddress = labels.getLabel(op1.operand, address + 1, true, size);
+                break;
+            case Unsized:
+            case Word:
+                labelAddress = labels.getLabel(op1.operand, address + 2, true, size);
+                break;
+            default:
+                // todo: support depends on architecture
+                labelAddress = labels.getLabel(op1.operand, address + 2, true, size);
+                break;
+        }
+
+        int offset = 0;
+
+        if (labelAddress >= 0) {
+            offset = labelAddress - address - 2;
+        }
+
+        int bytes = 0;
+        int memory_read = 0;
+
+        switch (size) {
+            case Byte:
+                if ((offset & 0x7f) != 0) {
+                    // offset out of range
+                }
+                opcode |= (offset & 0xff);
+                break;
+            case Unsized:
+            case Word:
+                bytes = 2;
+                memory_read = offset;
+                break;
+            case Long:
+                bytes = 4;
+                memory_read = offset;
+                break;
+        }
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, bytes, memory_read));
+    }
+
+    protected int nameToOpcode(String name) {
+        name = name.trim().toLowerCase();
+
+        if (name.indexOf('.') > -1) {
+            name = name.substring(0, name.indexOf('.'));
+        }
+
+        for (int index = 0; index < names.length; index++) {
+            if (name.equals(names[index])) {
+                return index;
+            }
+        }
+
+        return -1;
     }
 
     protected final int bxx_byte(int opcode)

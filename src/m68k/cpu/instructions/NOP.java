@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -51,7 +52,7 @@ public class NOP implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
+        return new DisassembledInstruction(address, 0x4e71, instruction.instruction);
     }
 }

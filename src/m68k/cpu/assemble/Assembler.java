@@ -25,9 +25,6 @@ import java.util.*;
  */
 public class Assembler {
 
-    private Map<String, Integer> labelLocations     = new HashMap<String, Integer>();
-    private Map<String, Set<LabelUsage>> labelUsage = new HashMap<String, Set<LabelUsage>>();
-
     private static Map<String, InstructionHandler> commandMapping = new HashMap<String, InstructionHandler>();
 
     {
@@ -43,6 +40,7 @@ public class Assembler {
         commandMapping.put("pea", new PEA(null));
         commandMapping.put("unlk", new UNLK(null));
 
+        commandMapping.put("abcd", new ABCD(null));
         commandMapping.put("add", new ADD(null));
         commandMapping.put("adda", new ADDA(null));
         commandMapping.put("addi", new ADDI(null));
@@ -64,6 +62,16 @@ public class Assembler {
         commandMapping.put("blt", new Bcc(null));
         commandMapping.put("bgt", new Bcc(null));
         commandMapping.put("ble", new Bcc(null));
+
+        commandMapping.put("trap",  new TRAP(null));
+        commandMapping.put("reset", new RESET(null));
+        commandMapping.put("nop",   new NOP(null));
+        commandMapping.put("stop",  new STOP(null));
+
+        commandMapping.put("rte",   new RTE(null));
+        commandMapping.put("rts",   new RTS(null));
+        commandMapping.put("trapv", new TRAPV(null));
+        commandMapping.put("rtr",   new RTR(null));
     }
 
     public SortedSet<Binary> assemble(String [] source) {
@@ -72,9 +80,11 @@ public class Assembler {
 
     private int pc;
     private AddressSpace mmu;
+    private Labels labels;
 
     public Assembler(AddressSpace mmu) {
         this.mmu = mmu;
+        this.labels = new Labels(mmu);
     }
 
     public int getPc() {
@@ -85,61 +95,6 @@ public class Assembler {
         this.pc = pc;
     }
 
-    private int getLabel(String label) {
-        Integer result = labelLocations.get(label);
-
-        if (result == null) {
-            result = -1;
-        }
-
-        return result;
-    }
-
-    private void setLabel(String label) {
-        setLabel(label, pc);
-    }
-
-    private void setLabel(String label, int address) {
-        labelLocations.put(label, address);
-
-        Set<LabelUsage> usages = labelUsage.get(label);
-
-        if (usages != null) {
-            for (LabelUsage usage : usages) {
-                switch(usage.size) {
-                    case Byte:
-                        mmu.writeByte(usage.address, address - usage.address + 1);
-                        break;
-                    case Word:
-                        mmu.writeWord(usage.address, address);
-                        break;
-                    case Long:
-                        mmu.writeLong(usage.address, address);
-                        break;
-                    case Unsized:
-                        throw new IllegalStateException("Label has no size! "+label);
-                }
-            }
-        }
-    }
-
-    private void labelUsage(String label, int address, Size size, boolean relative) {
-        Set<LabelUsage> addresses = labelUsage.get(label);
-
-        if (addresses == null) {
-            addresses = new HashSet<LabelUsage>();
-
-            labelUsage.put(label, addresses);
-        }
-
-        addresses.add(new LabelUsage(label, address, size, relative));
-    }
-
-    private Integer getLabelAddress(String label) {
-        return labelLocations.get(label);
-    }
-
-
     private AssembledOperand handleLabel(Size size, AssembledOperand instruction) {
         AssembledOperand result = instruction;
 
@@ -147,7 +102,7 @@ public class Assembler {
             String label = ((LabelOperand) instruction).operand;
             int pc = ((LabelOperand) instruction).memory_read;
 
-            setLabel(label, pc);
+            labels.addLabel(label, pc);
         }
 
         return result;
@@ -216,9 +171,9 @@ public class Assembler {
         }
 
         if (lower.endsWith(":")) {
-            setLabel(lower.substring(0, lower.length() - 1));
+            labels.addLabel(lower.substring(0, lower.length() - 1), pc);
 
-            return new DisassembledInstruction(pc, 0, line);
+            return new DisassembledInstruction(pc, -1, line);
         }
 
         if (lower.contains(" equ ")) {
@@ -227,7 +182,7 @@ public class Assembler {
             if (parts.length != 2) {
                 throw new IllegalArgumentException("Can't parse '" + line + "'");
             } else {
-                setLabel(parts[0].trim(), operandParser.parseValue(parts[1].trim()));
+                labels.addLabel(parts[0].trim(), operandParser.parseValue(parts[1].trim()));
             }
 
             return new DisassembledInstruction(pc, 0, line);
@@ -293,22 +248,18 @@ public class Assembler {
 
             AssembledInstruction instruction = new AssembledInstruction(mnemonic, size, operand1, operand2);
 
-            DisassembledInstruction disassembled = handler.assemble(pc, instruction);
+            DisassembledInstruction disassembled = handler.assemble(pc, instruction, labels);
 
             for (Byte byt : disassembled.bytes()) {
                 mmu.writeByte(pc++, byt);
             }
-
-            // todo: labels
 
             return disassembled;
         }
     }
 
     public void printSymbols() {
-        for (Map.Entry<String, Integer> entry : labelLocations.entrySet()) {
-            System.out.println(String.format("%32s %08x", entry.getKey(), entry.getValue()));
-        }
+        labels.printLabels(System.out);
     }
 
     public static void main(String[] args) throws IOException, ParseException {
@@ -328,12 +279,10 @@ public class Assembler {
             DisassembledInstruction dis = asm.parseLine(line);
 
             System.out.println(dis);
+        }
 
-            List<Byte> bytes = dis.bytes();
-
-            for (Byte byt : bytes) {
-                out.write((byt & 0xff));
-            }
+        for (int pc = 0; pc < asm.getPc(); pc++) {
+            out.write(memory.readByte(pc));
         }
 
         out.close();

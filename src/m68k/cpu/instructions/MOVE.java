@@ -3,6 +3,7 @@ package m68k.cpu.instructions;
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.AssembledOperand;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -181,7 +182,7 @@ public class MOVE implements InstructionHandler
 		return new DisassembledInstruction(address, opcode, "move" + sz.ext(), src, dst);
 	}
 
-    public final DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public final DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         int opcode = 0;
 
         switch(instruction.size) {

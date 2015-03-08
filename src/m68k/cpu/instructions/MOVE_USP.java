@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -82,7 +83,7 @@ public class MOVE_USP implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         return null;
     }
 

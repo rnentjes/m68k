@@ -88,30 +88,32 @@ public class DisassembledInstruction
     public List<Byte> bytes() {
         List<Byte> result = new ArrayList<Byte>();
 
-        result.add((byte)(opcode / 256));
-        result.add((byte)(opcode % 256));
+        if (opcode >= 0) {
+            result.add((byte) (opcode / 256));
+            result.add((byte) (opcode % 256));
 
-        if (num_operands >= 1) {
-            if (op1.bytes == 2) {
-                result.add((byte) ((op1.memory_read >> 8) % 256));
-                result.add((byte) ((op1.memory_read) % 256));
-            } else if (op1.bytes == 4) {
-                result.add((byte) ((op1.memory_read >> 24) % 256));
-                result.add((byte) ((op1.memory_read >> 16) % 256));
-                result.add((byte) ((op1.memory_read >> 8) % 256));
-                result.add((byte) ((op1.memory_read) % 256));
+            if (num_operands >= 1) {
+                if (op1.bytes == 2) {
+                    result.add((byte) ((op1.memory_read >> 8) % 256));
+                    result.add((byte) ((op1.memory_read) % 256));
+                } else if (op1.bytes == 4) {
+                    result.add((byte) ((op1.memory_read >> 24) % 256));
+                    result.add((byte) ((op1.memory_read >> 16) % 256));
+                    result.add((byte) ((op1.memory_read >> 8) % 256));
+                    result.add((byte) ((op1.memory_read) % 256));
+                }
             }
-        }
 
-        if (num_operands >= 2) {
-            if (op2.bytes == 2) {
-                result.add((byte) ((op2.memory_read >> 8) & 0xff));
-                result.add((byte) ((op2.memory_read) & 0xff));
-            } else if (op2.bytes == 4) {
-                result.add((byte) ((op2.memory_read >> 24) % 256));
-                result.add((byte) ((op2.memory_read >> 16) % 256));
-                result.add((byte) ((op2.memory_read >> 8) % 256));
-                result.add((byte) ((op2.memory_read) % 256));
+            if (num_operands >= 2) {
+                if (op2.bytes == 2) {
+                    result.add((byte) ((op2.memory_read >> 8) & 0xff));
+                    result.add((byte) ((op2.memory_read) & 0xff));
+                } else if (op2.bytes == 4) {
+                    result.add((byte) ((op2.memory_read >> 24) % 256));
+                    result.add((byte) ((op2.memory_read >> 16) % 256));
+                    result.add((byte) ((op2.memory_read >> 8) % 256));
+                    result.add((byte) ((op2.memory_read) % 256));
+                }
             }
         }
 
@@ -157,30 +159,36 @@ public class DisassembledInstruction
 
 	public void formatInstruction(StringBuilder buffer)
 	{
-		buffer.append(String.format("%08x   %04x", address, opcode));
+        if (opcode >= 0) {
+            buffer.append(String.format("%08x   %04x", address, opcode));
+        } else {
+            buffer.append(String.format("%08x       ", address));
+            buffer.append("                   ").append(instruction);
+            return;
+        }
 
 		switch(num_operands)
 		{
 			case 0:
 			{
 				// 20 spaces
-				buffer.append("                    ").append(instruction);
+				buffer.append("                     ").append(instruction);
 				break;
 			}
 			case 1:
 			{
 				if(op1.bytes == 2)
 				{
-					buffer.append(String.format(" %04x               ", op1.memory_read));
+					buffer.append(String.format(" %04x                ", (op1.memory_read & 0xffff)));
 				}
 				else if(op1.bytes == 4)
 				{
-					buffer.append(String.format(" %08x           ", op1.memory_read));
+					buffer.append(String.format(" %08x            ", op1.memory_read));
 				}
 				else
 				{
 					// 20 spaces
-					buffer.append("                    ");
+					buffer.append("                     ");
 				}
 
 				int ilen = instruction.length();
@@ -199,7 +207,7 @@ public class DisassembledInstruction
 
 				if(op1.bytes == 2)
 				{
-					buffer.append(String.format(" %04x", op1.memory_read));
+					buffer.append(String.format(" %04x", (op1.memory_read & 0xffff) ));
 					len += 5;
 				}
 				else if(op1.bytes == 4)
@@ -210,7 +218,7 @@ public class DisassembledInstruction
 
 				if(op2.bytes == 2)
 				{
-					buffer.append(String.format(" %04x", op2.memory_read));
+					buffer.append(String.format(" %04x", (op2.memory_read & 0xffff) ));
 					len += 5;
 				}
 				else if(op2.bytes == 4)

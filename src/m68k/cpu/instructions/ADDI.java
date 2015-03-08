@@ -3,6 +3,7 @@ package m68k.cpu.instructions;
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.AssembledOperand;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -93,7 +94,7 @@ public class ADDI implements InstructionHandler
 			{
 				if(ea_mode == 1)
 					continue;
-				
+
 				for(int ea_reg = 0; ea_reg < 8; ea_reg++)
 				{
 					if(ea_mode == 7 && ea_reg > 1)
@@ -105,7 +106,7 @@ public class ADDI implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         int opcode = 0x0600;
 
         switch(instruction.size) {

@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -57,8 +58,19 @@ public class TRAP implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
+        int opcode = 0x4e40;
+
+        DisassembledOperand op1 = instruction.op1;
+
+        if (op1.memory_read > 15) {
+            throw new IllegalArgumentException("Value out of range for trap instuction "+op1.memory_read);
+        }
+
+        opcode |= op1.memory_read;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, 0, op1.memory_read));
     }
 
     protected final int trap(int opcode)

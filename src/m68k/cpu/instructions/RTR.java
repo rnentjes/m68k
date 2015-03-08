@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -53,7 +54,14 @@ public class RTR implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
-        return null;
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
+        int opcode = 0x4e77;
+
+        DisassembledOperand op1 = instruction.op1;
+        DisassembledOperand op2 = instruction.op2;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 }

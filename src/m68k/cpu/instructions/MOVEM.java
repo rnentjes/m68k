@@ -4,6 +4,7 @@ import m68k.cpu.*;
 import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.AssembledOperand;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -147,7 +148,7 @@ public class MOVEM implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         int opcode = 0x4880;
 
         switch(instruction.size) {

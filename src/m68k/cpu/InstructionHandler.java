@@ -1,6 +1,7 @@
 package m68k.cpu;
 
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -30,6 +31,6 @@ public interface InstructionHandler
 {
 	public void register(InstructionSet is);
 
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction);
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels);
 
 }

@@ -3,6 +3,7 @@ package m68k.cpu.instructions;
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.AssembledOperand;
+import m68k.cpu.assemble.Labels;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -58,7 +59,7 @@ public class UNLK implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
         int opcode = 0x4e58;
 
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
