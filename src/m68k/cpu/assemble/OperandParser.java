@@ -66,7 +66,9 @@ public class OperandParser {
      * c - ccr register
      * w - word
      * l - long
-     * b - could be labal
+     * + - post increment
+     * - - pre increment
+     * b - could be label
      */
     private static class Part {
         public char type = ' ';
@@ -357,7 +359,7 @@ public class OperandParser {
 
             if (!(ch >= 'a' && ch <='z') && index == 0) {
                 return false;
-            } if (!(ch >= 'a' && ch <='z') && !(ch >= '0' && ch <='9')) {
+            } if (!(ch >= 'a' && ch <='z') && !(ch >= '0' && ch <='9') && !(ch == '_')) {
                 return false;
             }
         }
@@ -418,6 +420,7 @@ public class OperandParser {
                 "sr",
                 "ccr",
                 "(10, a2, d1)",
+                "10(a2, d1)",
                 "d1-d2/d5",
                 "a1/a3/a5/a7",
                 "xxxx"

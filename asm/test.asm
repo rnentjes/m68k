@@ -1,14 +1,5 @@
-pipo    equ $1000
-clown   equ 1000
-start:
-    addx    d2, d3
-    addx    -(a5), -(a3)
-    abcd    d4, d6
-    abcd     -(a5), -(a1)
-    move.w  pipo, d0
-    bsr.b   test
-    BRA.B   start
-
-test:
-    MOVEQ    #3, D4
+    AND.B d0, d1
+    AND.W 12(a1), d3
+    AND.W d2, (a2)
+    AND.W #$12, d2
     RTS
