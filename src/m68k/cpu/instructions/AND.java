@@ -1,10 +1,20 @@
 package m68k.cpu.instructions;
 
-import m68k.cpu.*;
+import m68k.cpu.Cpu;
+import m68k.cpu.DisassembledInstruction;
+import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Instruction;
+import m68k.cpu.InstructionHandler;
+import m68k.cpu.InstructionSet;
+import m68k.cpu.InstructionType;
+import m68k.cpu.Operand;
+import m68k.cpu.Size;
 import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
+
+import java.text.ParseException;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -172,16 +182,35 @@ public class AND implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) throws ParseException {
         int opcode = 0xc000;
 
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
         AssembledOperand op2 = (AssembledOperand)instruction.op2;
 
-        if (op1.mode == AddressingMode.IMMEDIATE) {
+        if (op2.mode == AddressingMode.CCR) {
+            // make it ANDI <data>, CCR instead
+            opcode = 0x023C;
+
+            // todo: check op1.memory_read > 0 & < 256
+        } else if (op1.mode == AddressingMode.IMMEDIATE) {
             // make it ANDI instead
-            System.err.print("not impl");
-        } else {
+            opcode = 0x0200;
+
+            switch (instruction.size) {
+                case Long:
+                    opcode |= 0x80;
+                    break;
+                case Byte:
+                    break;
+                default:
+                    opcode |= 0x40;
+                    break;
+            }
+
+            opcode |= op2.register;
+            opcode |= op2.mode.bits() << 3;
+        } else if (!instruction.instruction.startsWith("andi")) {
             if (op2.mode == AddressingMode.IMMEDIATE_DATA) {
                 switch (instruction.size) {
                     case Long:
@@ -214,6 +243,8 @@ public class AND implements InstructionHandler
                 opcode |= op2.mode.bits() << 3;
                 opcode |= op1.register << 9;
             }
+        } else {
+            throw new ParseException("Wrong addressing mode(s) for andi", instruction.address);
         }
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,

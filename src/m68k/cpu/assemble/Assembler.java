@@ -48,6 +48,9 @@ public class Assembler {
 
         // logical
         commandMapping.put("and", new AND(null));
+        commandMapping.put("andi", new AND(null));
+        commandMapping.put("asl", new ASL(null));
+        commandMapping.put("asr", new ASR(null));
 
 
         // control flow

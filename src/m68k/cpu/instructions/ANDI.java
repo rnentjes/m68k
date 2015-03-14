@@ -102,11 +102,13 @@ public class ANDI implements InstructionHandler
 				}
 			}
 		}
+
+        // todo: add andi <>, ccr instuction
 	}
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("ANDI instruction should be handled by AND instruction.");
     }
 
     protected int andi_byte(int opcode)
@@ -159,7 +161,7 @@ public class ANDI implements InstructionHandler
 		return (dst.isRegisterMode() ? 14 : 20 + dst.getTiming());
 	}
 
-	protected final DisassembledInstruction disassembleOp(int address, int opcode, Size sz)
+    protected final DisassembledInstruction disassembleOp(int address, int opcode, Size sz)
 	{
 		int imm_bytes;
 		int imm;

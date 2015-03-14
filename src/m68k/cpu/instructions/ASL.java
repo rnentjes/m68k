@@ -1,7 +1,17 @@
 package m68k.cpu.instructions;
 
-import m68k.cpu.*;
+import m68k.cpu.Cpu;
+import m68k.cpu.DisassembledInstruction;
+import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Instruction;
+import m68k.cpu.InstructionHandler;
+import m68k.cpu.InstructionSet;
+import m68k.cpu.InstructionType;
+import m68k.cpu.Operand;
+import m68k.cpu.Size;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -180,7 +190,46 @@ public class ASL implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = 0xe000;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        switch (instruction.size) {
+            case Long:
+                opcode |= 0x80;
+                break;
+            case Byte:
+                break;
+            default:
+                opcode |= 0x40;
+                break;
+        }
+
+        int op1_bytes = op1.bytes;
+        if (op1.mode != AddressingMode.IMMEDIATE) {
+            // todo: check addressing mode is valid
+            // register shift
+            opcode |= 0xe0;
+            opcode |= op1.register;
+            opcode |= op1.mode.bits() << 3;
+        } else {
+            // todo: check memory_read < 8
+            if (op1.memory_read < 8) {
+                opcode |= op1.memory_read << 9;
+            } else if (op1.memory_read > 8) {
+                // note op1.memory_read == 8 is fine
+                // todo: error
+            }
+            op1_bytes = 0;
+        }
+
+        // shift left
+        opcode |= 0x100;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1_bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected int asl_byte_imm(int opcode)
