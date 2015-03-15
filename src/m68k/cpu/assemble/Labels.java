@@ -71,6 +71,10 @@ public class Labels {
         }
     }
 
+    public boolean hasLabel(String name) {
+        return labels.containsKey(name);
+    }
+
     public int getLabel(String name, int pc, boolean relative, Size size) {
         Integer result = labels.get(name);
 

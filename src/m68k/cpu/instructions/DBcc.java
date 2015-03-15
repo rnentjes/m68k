@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -63,7 +64,52 @@ public class DBcc implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = nameToOpcode(instruction.instruction);
+
+        if (opcode == -1) {
+            throw new IllegalStateException("Unknown opcode "+instruction.instruction);
+        }
+
+        opcode = opcode << 8;
+        opcode |= 0x50c8;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        int labelAddress;
+
+        labelAddress = labels.getLabel(op2.operand, address + 2, true, Size.Word);
+
+        int offset = 0;
+
+        if (labelAddress >= 0) {
+            offset = labelAddress - address - 2;
+        }
+
+        int bytes = 2;
+        int memory_read = offset;
+
+        opcode |= op1.register;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op2.memory_read),
+                new DisassembledOperand(op2.operand, bytes, memory_read));
+    }
+
+    protected int nameToOpcode(String name) {
+        name = name.trim().toLowerCase();
+
+        if (name.indexOf('.') > -1) {
+            name = name.substring(0, name.indexOf('.'));
+        }
+
+        for (int index = 0; index < names.length; index++) {
+            if (name.equals(names[index])) {
+                return index;
+            }
+        }
+
+        return -1;
     }
 
     protected final int dbxx(int opcode)

@@ -209,10 +209,15 @@ public class OperandParser {
                 } else {
                     if (couldBeLabel(operand)) {
                         mode = AddressingMode.LABEL;
-                        memory_read = labels.getLabel(operand, 0, false, Size.Unsized);
 
-                        if (memory_read == -1) {
-                            throw new ParseException("Unkown label "+operand, lineNumber);
+                        if (labels.hasLabel(operand)) {
+                            memory_read = labels.getLabel(operand, 0, false, size);
+
+                            if (memory_read == -1) {
+                                throw new ParseException("Unkown label "+operand, lineNumber);
+                            }
+                        } else {
+                            memory_read = 0;
                         }
                     } else {
                         throw new ParseException("Unable to parse expression '" + operand + "'", lineNumber);

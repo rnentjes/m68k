@@ -74,6 +74,7 @@ public class Assembler {
         commandMapping.put("not", new NEGX(null));
 
         // control flow
+        // branch
         commandMapping.put("bra", new Bcc(null));
         commandMapping.put("bsr", new Bcc(null));
         commandMapping.put("bhi", new Bcc(null));
@@ -90,6 +91,23 @@ public class Assembler {
         commandMapping.put("blt", new Bcc(null));
         commandMapping.put("bgt", new Bcc(null));
         commandMapping.put("ble", new Bcc(null));
+        // dec and brach
+        commandMapping.put("dbra", new DBcc(null));
+        commandMapping.put("dbsr", new DBcc(null));
+        commandMapping.put("dbhi", new DBcc(null));
+        commandMapping.put("dbls", new DBcc(null));
+        commandMapping.put("dbcc", new DBcc(null));
+        commandMapping.put("dbcs", new DBcc(null));
+        commandMapping.put("dbne", new DBcc(null));
+        commandMapping.put("dbeq", new DBcc(null));
+        commandMapping.put("dbvc", new DBcc(null));
+        commandMapping.put("dbvs", new DBcc(null));
+        commandMapping.put("dbpl", new DBcc(null));
+        commandMapping.put("dbmi", new DBcc(null));
+        commandMapping.put("dbge", new DBcc(null));
+        commandMapping.put("dblt", new DBcc(null));
+        commandMapping.put("dbgt", new DBcc(null));
+        commandMapping.put("dble", new DBcc(null));
 
         commandMapping.put("trap",  new TRAP(null));
         commandMapping.put("reset", new RESET(null));
@@ -246,20 +264,17 @@ public class Assembler {
             command = mnemonic;
         }
 
-        if (numberOfParts >= 1) {
-            operand1 = operandParser.parse(labels, size, pc, lineNumber, op1);
-        }
-        if (numberOfParts >= 2) {
-            operand2 = operandParser.parse(labels, size, pc, lineNumber, op2);
-        }
-
         if (commandMapping.get(command) == null) {
             throw new ParseException("Mnemonic '" + command + "' not found!", lineNumber);
         } else {
             InstructionHandler handler = commandMapping.get(command);
 
-            //handleLabel(operand1);
-            //handleLabel(operand2);
+            if (numberOfParts >= 1) {
+                operand1 = operandParser.parse(labels, size, pc, lineNumber, op1);
+            }
+            if (numberOfParts >= 2) {
+                operand2 = operandParser.parse(labels, size, pc, lineNumber, op2);
+            }
 
             AssembledInstruction instruction = new AssembledInstruction(mnemonic, size, operand1, operand2);
 
