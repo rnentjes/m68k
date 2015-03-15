@@ -1,0 +1,8 @@
+ANDI
+  ANDI  <ea>, ccr
+  ANDI  d0, ccr     (023c)      -> ????
+
+CHK:
+  CHK #4, d0        (41bc 0004) -> chk d0, sr
+  CHK (a6), d0      (4b96)      -> chk d5, (a6)
+  CHK 10(a6, d2)    (4fb6 200a) -> chk d7, $0a(a6,d2.w)

@@ -106,7 +106,7 @@ public class NOT implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("NOT should be implemented by NEGX!");
     }
 
     protected final int not_byte(int opcode)

@@ -1,6 +1,13 @@
 package m68k.cpu.instructions;
 
-import m68k.cpu.*;
+import m68k.cpu.Cpu;
+import m68k.cpu.DisassembledInstruction;
+import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Instruction;
+import m68k.cpu.InstructionHandler;
+import m68k.cpu.InstructionSet;
+import m68k.cpu.Operand;
+import m68k.cpu.Size;
 import m68k.cpu.assemble.AssembledInstruction;
 import m68k.cpu.assemble.Labels;
 /*
@@ -105,7 +112,7 @@ public class CLR implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("CLR should be implemented by NEGX!");
     }
 
     protected final int clr_byte(int opcode)

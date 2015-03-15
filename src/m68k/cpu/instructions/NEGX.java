@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -106,7 +107,35 @@ public class NEGX implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = 0x4000;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+
+        switch (instruction.size) {
+            case Long:
+                // todo: check MC68020+
+                opcode |= 0x80;
+                break;
+            case Byte:
+                break;
+            default:
+                opcode |= 0x40;
+                break;
+        }
+
+        if (instruction.instruction.startsWith("clr")) {
+            opcode |= 0x200;
+        } else if (instruction.instruction.startsWith("neg")) {
+            opcode |= 0x400;
+        } else if (instruction.instruction.startsWith("not")) {
+            opcode |= 0x600;
+        }
+
+        opcode |= op1.register;
+        opcode |= op1.mode.bits() << 3;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read));
     }
 
     protected int negx_byte(int opcode)

@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 /*
 //  M68k - Java Amiga MachineCore
@@ -71,7 +72,28 @@ public class CHK implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = 0x4000;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        switch (instruction.size) {
+            case Long:
+                // todo: check MC68020+
+                opcode |= 0x100;
+                break;
+            default:
+                opcode |= 0x180;
+                break;
+        }
+
+        opcode |= op1.register;
+        opcode |= op1.mode.bits() << 3;
+        opcode |= op2.register << 9;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int chk(int opcode)

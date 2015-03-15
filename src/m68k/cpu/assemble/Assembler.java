@@ -64,6 +64,15 @@ public class Assembler {
         commandMapping.put("bclr", new BCHG(null));
         commandMapping.put("bset", new BCHG(null));
 
+        // chk
+        commandMapping.put("chk", new CHK(null));
+
+        // negate
+        commandMapping.put("negx", new NEGX(null));
+        commandMapping.put("clr", new NEGX(null));
+        commandMapping.put("neg", new NEGX(null));
+        commandMapping.put("not", new NEGX(null));
+
         // control flow
         commandMapping.put("bra", new Bcc(null));
         commandMapping.put("bsr", new Bcc(null));

@@ -106,7 +106,7 @@ public class NEG implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("NEG should be implemented by NEGX!");
     }
 
     protected int neg_byte(int opcode)

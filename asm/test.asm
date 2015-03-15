@@ -1,9 +1,10 @@
-    BCLR #2, d2
-    BCLR #2, 3(a0, d1.l)
-    BCLR d0, d1
-    BCLR d5, (a3)
-    BSET #2, d2
-    BSET #2, 3(a0, d1.l)
-    BSET d0, d1
-    BSET d5, (a3)
+    not.l (d3)
+    nop
+    nop
+    not.w (a6)
+    nop
+    nop
+    not.b 10(a6, d2)
+    nop
+    nop
     RTS
