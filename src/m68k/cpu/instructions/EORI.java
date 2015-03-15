@@ -109,7 +109,7 @@ public class EORI implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("EORI instruction should be handled by EOR instruction.");
     }
 
     protected final int eori_byte(int opcode)

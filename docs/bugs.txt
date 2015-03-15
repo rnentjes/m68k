@@ -2,6 +2,12 @@ ANDI
   ANDI  <ea>, ccr
   ANDI  d0, ccr     (023c)      -> ????
 
+ORI
+  ORI   <ea>,ccr
+
+EORI
+  EORI  <ea>,ccr
+
 CHK:
   CHK #4, d0        (41bc 0004) -> chk d0, sr
   CHK (a6), d0      (4b96)      -> chk d5, (a6)

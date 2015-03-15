@@ -1,8 +1,12 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
+
+import java.text.ParseException;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -109,8 +113,74 @@ public class EOR implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) throws ParseException {
+        int opcode = 0xb100;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        if (op2.mode == AddressingMode.CCR) {
+            // make it ANDI <data>, CCR instead
+            opcode = 0x0a3c;
+
+            // todo: check op1.memory_read > 0 & < 256
+        } else if (op1.mode == AddressingMode.IMMEDIATE) {
+            // make it ANDI instead
+            opcode = 0x0a00;
+
+            switch (instruction.size) {
+                case Long:
+                    opcode |= 0x80;
+                    break;
+                case Byte:
+                    break;
+                default:
+                    opcode |= 0x40;
+                    break;
+            }
+
+            opcode |= op2.register;
+            opcode |= op2.mode.bits() << 3;
+        } else if (!instruction.instruction.startsWith("eori")) {
+            if (op2.mode == AddressingMode.IMMEDIATE_DATA) {
+                switch (instruction.size) {
+                    case Long:
+                        opcode |= 0x80;
+                        break;
+                    case Byte:
+                        break;
+                    default:
+                        opcode |= 0x40;
+                        break;
+                }
+
+                opcode |= op1.register;
+                opcode |= op1.mode.bits() << 3;
+                opcode |= op2.register << 9;
+            } else {
+                switch (instruction.size) {
+                    case Long:
+                        opcode |= 0x180;
+                        break;
+                    case Byte:
+                        opcode |= 0x100;
+                        break;
+                    default:
+                        opcode |= 0x140;
+                        break;
+                }
+
+                opcode |= op2.register;
+                opcode |= op2.mode.bits() << 3;
+                opcode |= op1.register << 9;
+            }
+        } else {
+            throw new ParseException("Wrong addressing mode(s) for eori", instruction.address);
+        }
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int eor_byte(int opcode)
