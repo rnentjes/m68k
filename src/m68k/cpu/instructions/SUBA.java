@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -92,8 +93,28 @@ public class SUBA implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
-    }
+        int opcode = 0x9000;
+
+        switch(instruction.size) {
+            case Word:
+                opcode |= 3 << 6;
+                break;
+            case Long:
+                opcode |= 7 << 6;
+                break;
+        }
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        opcode |= op1.mode.bits() << 3;
+        opcode |= op1.register;
+
+        opcode |= op2.register << 9;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));    }
 
     protected final int suba_word(int opcode)
 	{

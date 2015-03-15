@@ -122,6 +122,7 @@ public class ADDI implements InstructionHandler
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
         AssembledOperand op2 = (AssembledOperand)instruction.op2;
 
+        // todo: check op2 correct mode
         opcode |= op2.mode.bits() << 3;
         opcode |= op2.register;
 

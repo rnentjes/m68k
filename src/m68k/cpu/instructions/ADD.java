@@ -185,13 +185,16 @@ public class ADD implements InstructionHandler
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
         AssembledOperand op2 = (AssembledOperand)instruction.op2;
 
-        if (op1.mode == AddressingMode.IMMEDIATE_DATA) {
+        if (op1.mode == AddressingMode.IMMEDIATE_DATA && op2.mode == AddressingMode.IMMEDIATE_DATA) {
+            opcode |= op2.register << 9;
+            opcode |= op1.register;
+        } else if (op1.mode == AddressingMode.IMMEDIATE_DATA) {
+            opcode |= 0x100;
             opcode |= op1.register << 9;
 
             opcode |= op2.mode.bits() << 3;
             opcode |= op2.register;
         } else {
-            opcode |= 0x100 << 6;
             opcode |= op2.register << 9;
 
             opcode |= op1.mode.bits() << 3;
