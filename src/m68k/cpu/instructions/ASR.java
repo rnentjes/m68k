@@ -180,7 +180,7 @@ public class ASR implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("ASR should be implemented by ASL!");
     }
 
     protected int asr_byte_imm(int opcode)

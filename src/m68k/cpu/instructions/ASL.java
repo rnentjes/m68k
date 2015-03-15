@@ -206,11 +206,31 @@ public class ASL implements InstructionHandler
                 break;
         }
 
+        // left shift?
+        if (instruction.instruction.startsWith("asl") || instruction.instruction.startsWith("lsl")) {
+            opcode |= 0x100;
+        }
+
         int op1_bytes = op1.bytes;
-        if (op1.mode != AddressingMode.IMMEDIATE) {
+
+        if (op2.mode == AddressingMode.NA) {
+            opcode |= 0xc0;
+            opcode |= op1.register;
+            opcode |= op1.mode.bits() << 3;
+
+            if (instruction.instruction.startsWith("lsl") || instruction.instruction.startsWith("lsr")) {
+                opcode |= 0x200;
+            } else if (instruction.instruction.startsWith("roxl") || instruction.instruction.startsWith("roxr")) {
+                opcode |= 0x400;
+            } else if (instruction.instruction.startsWith("rol") || instruction.instruction.startsWith("ror")) {
+                opcode |= 0x600;
+            }
+
+            return new DisassembledInstruction(address, opcode, instruction.instruction,
+                    new DisassembledOperand(op1.operand, op1_bytes, op1.memory_read));
+        } else if (op1.mode != AddressingMode.IMMEDIATE) {
             // todo: check addressing mode is valid
             // register shift
-            opcode |= 0xe0;
             opcode |= op1.register;
             opcode |= op1.mode.bits() << 3;
         } else {
@@ -222,10 +242,17 @@ public class ASL implements InstructionHandler
                 // todo: error
             }
             op1_bytes = 0;
+            opcode |= op2.register;
+            opcode |= op2.mode.bits() << 3;
         }
 
-        // shift left
-        opcode |= 0x100;
+        if (instruction.instruction.startsWith("lsl") || instruction.instruction.startsWith("lsr")) {
+            opcode |= 0x8;
+        } else if (instruction.instruction.startsWith("roxl") || instruction.instruction.startsWith("roxr")) {
+            opcode |= 0x10;
+        } else if (instruction.instruction.startsWith("rol") || instruction.instruction.startsWith("ror")) {
+            opcode |= 0x18;
+        }
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,
                 new DisassembledOperand(op1.operand, op1_bytes, op1.memory_read),

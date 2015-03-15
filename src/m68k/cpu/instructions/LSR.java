@@ -180,7 +180,7 @@ public class LSR implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("LSR should be implemented by ASL!");
     }
 
     protected int lsr_byte_imm(int opcode)

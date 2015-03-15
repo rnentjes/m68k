@@ -180,7 +180,7 @@ public class ROXL implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("ROXL should be implemented by ASL!");
     }
 
     protected int roxl_byte_imm(int opcode)

@@ -180,7 +180,7 @@ public class ROR implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("ROR should be implemented by ASL!");
     }
 
     protected int ror_byte_imm(int opcode)
