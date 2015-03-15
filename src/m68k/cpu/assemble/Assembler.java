@@ -58,6 +58,11 @@ public class Assembler {
         commandMapping.put("rol", new ASL(null));
         commandMapping.put("ror", new ASL(null));
 
+        // bits
+        commandMapping.put("bchg", new BCHG(null));
+        commandMapping.put("btst", new BCHG(null));
+        commandMapping.put("bclr", new BCHG(null));
+        commandMapping.put("bset", new BCHG(null));
 
         // control flow
         commandMapping.put("bra", new Bcc(null));

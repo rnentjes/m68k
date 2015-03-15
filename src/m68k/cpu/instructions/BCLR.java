@@ -135,7 +135,7 @@ public class BCLR implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("BCLR should be implemented by BCHG!");
     }
 
     protected final int bclr_dyn_byte(int opcode)

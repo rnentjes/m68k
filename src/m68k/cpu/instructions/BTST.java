@@ -135,7 +135,7 @@ public class BTST implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("BTST should be implemented by BCHG!");
     }
 
     protected final int btst_dyn_byte(int opcode)

@@ -135,7 +135,7 @@ public class BSET implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("BSET should be implemented by BCHG!");
     }
 
     protected final int bset_dyn_byte(int opcode)

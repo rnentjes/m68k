@@ -1,8 +1,19 @@
 package m68k.cpu.instructions;
 
-import m68k.cpu.*;
+import m68k.cpu.Cpu;
+import m68k.cpu.DisassembledInstruction;
+import m68k.cpu.DisassembledOperand;
+import m68k.cpu.Instruction;
+import m68k.cpu.InstructionHandler;
+import m68k.cpu.InstructionSet;
+import m68k.cpu.Operand;
+import m68k.cpu.Size;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
+
+import java.text.ParseException;
 
 /*
 //  M68k - Java Amiga MachineCore
@@ -135,8 +146,40 @@ public class BCHG implements InstructionHandler
 	}
 
     @Override
-    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+    public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) throws ParseException {
+        int opcode = 0x0000;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        if (op1.mode == AddressingMode.IMMEDIATE) {
+            opcode |= 0x800;
+
+            if (op1.memory_read > 255) {
+                throw new ParseException("Value out of (byte) range "+op1.memory_read, address);
+            }
+
+            opcode |= op2.register;
+            opcode |= op2.mode.bits() << 3;
+        } else {
+            opcode |= 0x100;
+
+            opcode |= op2.register;
+            opcode |= op2.mode.bits() << 3;
+            opcode |= op1.register << 9;
+        }
+
+        if (instruction.instruction.startsWith("bchg")) {
+            opcode |= 0x40;
+        } else if (instruction.instruction.startsWith("bclr")) {
+            opcode |= 0x80;
+        } else if (instruction.instruction.startsWith("bset")) {
+            opcode |= 0xc0;
+        }
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int bchg_dyn_byte(int opcode)
