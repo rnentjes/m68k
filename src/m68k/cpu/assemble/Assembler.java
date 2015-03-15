@@ -52,6 +52,11 @@ public class Assembler {
         commandMapping.put("subq", new SUBQ(null));
         commandMapping.put("subx", new SUBX(null));
 
+        commandMapping.put("cmp", new CMP(null));
+        commandMapping.put("cmpa", new CMPA(null));
+        commandMapping.put("cmpi", new CMPI(null));
+        commandMapping.put("cmpm", new CMPM(null));
+
         // logical
         commandMapping.put("and", new AND(null));
         commandMapping.put("andi", new AND(null));

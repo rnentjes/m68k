@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 /*
 //  M68k - Java Amiga MachineCore
@@ -99,7 +100,28 @@ public class CMPM implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        int opcode = 0xb108;
+
+        AssembledOperand op1 = (AssembledOperand)instruction.op1;
+        AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+        switch(instruction.size) {
+            case Long:
+                opcode |= 0x80;
+                break;
+            case Word:
+            case Unsized:
+                opcode |= 0x40;
+                break;
+        }
+
+        opcode |= 0x8;
+        opcode |= op1.register;
+        opcode |= op2.register << 9;
+
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int cmpm_byte(int opcode)

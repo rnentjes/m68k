@@ -128,7 +128,8 @@ public class SUBI implements InstructionHandler
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,
                 new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
-                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));    }
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
+    }
 
     protected int subi_byte(int opcode)
 	{

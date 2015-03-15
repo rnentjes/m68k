@@ -114,7 +114,8 @@ public class SUBA implements InstructionHandler
 
         return new DisassembledInstruction(address, opcode, instruction.instruction,
                 new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
-                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));    }
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
+    }
 
     protected final int suba_word(int opcode)
 	{
