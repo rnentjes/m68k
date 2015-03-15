@@ -107,7 +107,7 @@ public class ORI implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
+        throw new IllegalStateException("ORI instruction should be handled by OR instruction.");
     }
 
     protected int ori_byte(int opcode)

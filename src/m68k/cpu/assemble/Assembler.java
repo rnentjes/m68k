@@ -49,6 +49,8 @@ public class Assembler {
         // logical
         commandMapping.put("and", new AND(null));
         commandMapping.put("andi", new AND(null));
+        commandMapping.put("or", new OR(null));
+        commandMapping.put("ori", new OR(null));
         commandMapping.put("asl", new ASL(null));
         commandMapping.put("asr", new ASL(null));
         commandMapping.put("lsl", new ASL(null));
