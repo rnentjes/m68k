@@ -58,6 +58,9 @@ public class Assembler {
         commandMapping.put("cmpm", new CMPM(null));
 
         commandMapping.put("divs", new DIVS(null));
+        commandMapping.put("divu", new DIVU(null));
+        commandMapping.put("muls", new MULS(null));
+        commandMapping.put("mulu", new MULU(null));
 
         // logical
         commandMapping.put("and", new AND(null));

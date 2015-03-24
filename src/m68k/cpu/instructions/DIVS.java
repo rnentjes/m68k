@@ -73,16 +73,7 @@ public class DIVS implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        int opcode = 0x8000;
-
-        switch(instruction.size) {
-            case Word:
-                opcode |= 1 << 6;
-                break;
-            case Long:
-                opcode |= 2 << 6;
-                break;
-        }
+        int opcode = 0x81c0;
 
         AssembledOperand op1 = (AssembledOperand)instruction.op1;
         AssembledOperand op2 = (AssembledOperand)instruction.op2;
@@ -103,10 +94,9 @@ public class DIVS implements InstructionHandler
             opcode |= op1.register;
         }
 
-//        return new DisassembledInstruction(address, opcode, instruction.instruction,
-//                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
-//                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
-        return null;
+        return new DisassembledInstruction(address, opcode, instruction.instruction,
+                new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+                new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
     }
 
     protected final int divs(int opcode)

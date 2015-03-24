@@ -1,7 +1,9 @@
 package m68k.cpu.instructions;
 
 import m68k.cpu.*;
+import m68k.cpu.assemble.AddressingMode;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 /*
 //  M68k - Java Amiga MachineCore
@@ -71,8 +73,31 @@ public class DIVU implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
-    }
+		int opcode = 0x80c0;
+
+		AssembledOperand op1 = (AssembledOperand)instruction.op1;
+		AssembledOperand op2 = (AssembledOperand)instruction.op2;
+
+		if (op1.mode == AddressingMode.IMMEDIATE_DATA && op2.mode == AddressingMode.IMMEDIATE_DATA) {
+			opcode |= op2.register << 9;
+			opcode |= op1.register;
+		} else if (op1.mode == AddressingMode.IMMEDIATE_DATA) {
+			opcode |= 0x100;
+			opcode |= op1.register << 9;
+
+			opcode |= op2.mode.bits() << 3;
+			opcode |= op2.register;
+		} else {
+			opcode |= op2.register << 9;
+
+			opcode |= op1.mode.bits() << 3;
+			opcode |= op1.register;
+		}
+
+		return new DisassembledInstruction(address, opcode, instruction.instruction,
+				new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read),
+				new DisassembledOperand(op2.operand, op2.bytes, op2.memory_read));
+	}
 
     protected final int divu(int opcode)
 	{
