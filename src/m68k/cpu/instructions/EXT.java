@@ -2,6 +2,7 @@ package m68k.cpu.instructions;
 
 import m68k.cpu.*;
 import m68k.cpu.assemble.AssembledInstruction;
+import m68k.cpu.assemble.AssembledOperand;
 import m68k.cpu.assemble.Labels;
 
 /*
@@ -84,8 +85,19 @@ public class EXT implements InstructionHandler
 
     @Override
     public DisassembledInstruction assemble(int address, AssembledInstruction instruction, Labels labels) {
-        return null;
-    }
+		int opcode = 0x4880;
+
+		AssembledOperand op1 = (AssembledOperand)instruction.op1;
+
+		if (instruction.size == Size.Long) {
+			opcode |= 0x40;
+		}
+
+		opcode |= op1.register;
+
+		return new DisassembledInstruction(address, opcode, instruction.instruction,
+				new DisassembledOperand(op1.operand, op1.bytes, op1.memory_read));
+	}
 
     protected final int ext_byte_to_word(int opcode)
 	{
